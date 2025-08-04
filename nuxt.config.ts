@@ -23,28 +23,18 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#405189', media: '(prefers-color-scheme: light)' },
       ],
       link: [
-        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon.ico' },
-        {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '32x32',
-          href: '/favicon-32x32.png',
-        },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/pwa-16x16.png' },
         {
           rel: 'icon',
           type: 'image/png',
           sizes: '16x16',
-          href: '/favicon.ico',
+          href: '/pwa-16x16.png',
         },
         {
           rel: 'icon',
           type: 'image/png',
-          sizes: '48x48',
-          href: '/favicon-48x48.png',
-        },
-        {
-          rel: 'manifest',
-          href: '/manifest.webmanifest',
+          sizes: '32x32',
+          href: '/pwa-32x32.png',
         },
       ],
     },
@@ -87,10 +77,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
   nitro: {
-    preset: 'node', // default is fine, just don’t use 'static' if you're SSR
-  },
-
-  nitro: {
+    preset: 'node',
     experimental: {
       tasks: process.env.NODE_ENV === 'production',
     },
