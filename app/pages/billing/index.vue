@@ -17,7 +17,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
         <ClientOnly>
-          <LazyBillingSummary
+          <BillingSummary
             :stats="billingData?.stats"
             :next-billing="billingData?.nextBilling"
             :current-month-status="billingData?.currentMonthStatus"
@@ -25,14 +25,14 @@
           />
         </ClientOnly>
         <ClientOnly>
-          <LazyBillingMonthlyReceipts
+          <BillingMonthlyReceipts
             :invoices="billingData?.invoices || []"
             :loading="status === 'pending'"
             @payment-completed="handlePaymentCompleted"
           />
         </ClientOnly>
         <ClientOnly>
-          <LazyBillingRecentTransactions
+          <BillingRecentTransactions
             :invoices="paidInvoices"
             :loading="status === 'pending'"
           />
@@ -41,17 +41,17 @@
 
       <div class="lg:col-span-1 space-y-6">
         <ClientOnly>
-          <LazyBillingMySubscription
+          <BillingMySubscription
             :stats="billingData?.stats"
             :next-billing="billingData?.nextBilling"
             :loading="status === 'pending'"
           />
         </ClientOnly>
         <ClientOnly>
-          <LazyBillingPaymentMethods />
+          <BillingPaymentMethods />
         </ClientOnly>
         <ClientOnly>
-          <LazyBillingPropertyUsageOverTime
+          <BillingPropertyUsageOverTime
             :invoices="billingData?.invoices || []"
           />
         </ClientOnly>
@@ -67,7 +67,7 @@ if (user.value?.role !== 'developer') {
   await navigateTo('/')
 }
 
-const { data, status, refresh } = await useLazyAsyncData(
+const { data, status, refresh } = await useAsyncData(
   'billingData',
   () => $fetch<any>('/api/billing'),
   {
