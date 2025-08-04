@@ -33,7 +33,8 @@ const form = ref({
   role: 'normal',
 })
 
-const handleSubmit = async () => {
+const handleSubmit = async (event: Event) => {
+  event.preventDefault()
   const { confirmPassword, ...registerData } = form.value
   if (!registerData.email) {
     registerData.email = `user${registerData.phone}@homeae.local`
