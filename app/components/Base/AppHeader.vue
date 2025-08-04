@@ -154,7 +154,10 @@ const props = withDefaults(defineProps<{
 
 const slots = useSlots()
 const hasActionsSlot = computed(() => !!slots.actions)
-const showDashboardControls = computed(() => props.forceDashboard || useRoute().path.startsWith('/'))
+const showDashboardControls = computed(() => {
+  const route = useRoute()
+  return props.forceDashboard || route.path === '/'
+})
 
 const toast = useToast()
 const colorMode = useColorMode()
