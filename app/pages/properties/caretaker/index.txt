@@ -1,0 +1,301 @@
+<template>
+  <div>
+    <BasePage
+      title="Property"
+      icon="i-lucide-building"
+      :status="status=== 'pending'"
+    >
+      <template #headerActions>
+        <UButton
+          color="primary"
+          variant="solid"
+          label="Reload"
+          icon="i-lucide-refresh-cw"
+          :loading="status === 'pending'"
+          @click="refresh()"
+        />
+      </template>
+      <div
+        v-if="data?.res?.property"
+        class="space-y-6"
+      >
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <UCard>
+            <div class="flex items-center">
+              <div class="rounded-full bg-tertiary-50 dark:bg-tertiary-900 p-3 mr-3">
+                <UIcon
+                  name="i-lucide-building"
+                  class="w-5 h-5 text-tertiary-500 dark:text-tertiary-400"
+                />
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Total Floors
+                </p>
+                <p class="text-xl font-medium text-gray-900 dark:text-white">
+                  {{ data?.res?.stats?.totalFloors || 0 }}
+                </p>
+              </div>
+            </div>
+          </UCard>
+          <UCard>
+            <div class="flex items-center">
+              <div class="rounded-full bg-primary-50 dark:bg-primary-900 p-3 mr-3">
+                <UIcon
+                  name="i-lucide-home"
+                  class="w-5 h-5 text-primary-500 dark:text-primary-400"
+                />
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Total Units
+                </p>
+                <p class="text-xl font-medium text-gray-900 dark:text-white">
+                  {{ data?.res?.stats?.totalUnits || 0 }}
+                </p>
+              </div>
+            </div>
+          </UCard>
+          <UCard>
+            <div class="flex items-center">
+              <div class="rounded-full bg-secondary-50 dark:bg-secondary-900 p-3 mr-3">
+                <UIcon
+                  name="i-lucide-key"
+                  class="w-5 h-5 text-secondary-500 dark:text-secondary-400"
+                />
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Occupied Units
+                </p>
+                <p class="text-xl font-medium text-gray-900 dark:text-white">
+                  {{ data?.res?.stats?.occupiedUnits || 0 }}
+                </p>
+              </div>
+            </div>
+          </UCard>
+          <UCard>
+            <div class="flex items-center">
+              <div class="rounded-full bg-success-50 dark:bg-success-900 p-3 mr-3">
+                <UIcon
+                  name="i-lucide-pie-chart"
+                  class="w-5 h-5 text-success-500 dark:text-success-400"
+                />
+              </div>
+              <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  Vacancy Rate
+                </p>
+                <p class="text-xl font-medium text-gray-900 dark:text-white">
+                  {{ data?.res?.stats?.vacancyRate || '0%' }}
+                </p>
+              </div>
+            </div>
+          </UCard>
+        </div>
+
+        <UCard class="mb-8">
+          <template #header>
+            <div class="flex flex-col sm:flex-row justify-between gap-2">
+              <div class="flex flex-wrap items-center">
+                <h2 class="text-lg font-medium text-gray-900 dark:text-white mr-2">
+                  {{ data?.res?.property.propertyName }}
+                </h2>
+                <div class="flex flex-col sm:flex-row justify-between gap-2">
+                  <div class="flex flex-wrap items-center">
+                    <div class="flex items-center">
+                      <span class="text-sm text-gray-500 dark:text-gray-400 mr-2">Unit Layout</span>
+                      <UBadge
+                        color="secondary"
+                        size="sm"
+                      >
+                        {{ data?.res?.property.categoryName }}
+                      </UBadge>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 rounded-full bg-primary-100 dark:bg-primary-900/50 border border-primary-300 dark:border-primary-700 mr-1" />
+                      <p class="text-xs text-gray-600 dark:text-gray-300">
+                        Occupied
+                      </p>
+                    </div>
+                    <div class="flex items-center">
+                      <div class="w-3 h-3 rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 mr-1" />
+                      <p class="text-xs text-gray-600 dark:text-gray-300">
+                        Vacant
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 sm:mt-0 gap-2 flex items-center">
+                <UButton
+                  color="primary"
+                  variant="solid"
+                  label="Unit List View"
+                  icon="i-lucide-list"
+                  size="sm"
+                  @click="navigateTo(`/units/?propertyId=${propertyId}`)"
+                />
+              </div>
+            </div>
+          </template>
+          <!-- Floor by floor visualization -->
+          <div
+            v-if=" data?.res?.property.floors && data?.res?.property.floors.length"
+            class="space-y-6"
+          >
+            <div
+              v-for="(floor, floorIndex) in data?.res?.property.floors"
+              :key="floorIndex"
+              class="border border-gray-200 dark:border-gray-700 rounded-lg p-2"
+            >
+              <div class="flex items-center justify-between mb-3 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
+                <div class="flex items-center">
+                  <UIcon
+                    name="i-lucide-layers"
+                    class="mr-2 text-gray-600 dark:text-gray-400"
+                  />
+                  <h3 class="font-medium text-gray-800 dark:text-gray-200 flex items-center flex-1">
+                    {{ floor.floorNumber }}
+                    <UBadge
+                      class="ml-2"
+                      size="sm"
+                    >
+                      {{ floor.units ? floor.units.length : 0 }} units
+                    </UBadge>
+                  </h3>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap p-2 bg-gray-100 dark:bg-gray-800 rounded-lg min-h-[100px]">
+                <div class="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center border-r-4 border-gray-400 dark:border-gray-600 mr-2">
+                  <UIcon
+                    name="i-lucide-steering-wheel"
+                    class="text-gray-600 dark:text-gray-400"
+                  />
+                </div>
+
+                <div class="flex flex-wrap flex-1 gap-2">
+                  <div
+                    v-for="(unit, unitIndex) in floor.units"
+                    :key="unitIndex"
+                    class="h-12 w-[calc(25%-0.5rem)] md:w-[calc(16.666%-0.5rem)] lg:w-[calc(12.5%-0.5rem)] flex items-center justify-center rounded-md border cursor-pointer transition-colors"
+                    :class="[
+                      unit.isOccupied
+                        ? 'bg-primary-100 dark:bg-primary-900/50 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
+                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600',
+                    ]"
+                    @click="navigateTo(`/units/${unit._id}?propertyId=${propertyId}`)"
+                  >
+                    <div class="text-xs text-center">
+                      {{ unit.unitNumber || `R${unitIndex + 1}` }}
+                      <UIcon
+                        v-if="unit.isOccupied"
+                        name="i-lucide-user"
+                        class="w-3 h-3 mx-auto mt-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else
+            class="text-center py-6 text-gray-500 dark:text-gray-400"
+          >
+            No floors or units defined for this  data?.res?.property.
+          </div>
+          <div
+            v-if="(data?.pagination?.total ?? 0) > limit"
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+          >
+            <div class="text-xs sm:text-sm text-gray-500 w-full sm:w-auto mb-2 sm:mb-0 break-words">
+              Showing {{ (data?.pagination.page - 1) * data?.pagination.limit + 1 }}-{{ Math.min(data?.pagination.page * data?.pagination.limit, data?.pagination.total) }} of {{ data?.pagination.total }} floors
+            </div>
+            <div class="flex items-center gap-1.5 self-end sm:self-auto">
+              <UPagination
+                v-model:page="currentPage"
+                :page-count="data?.pagination?.pages"
+                :total="data?.pagination?.total || 0"
+                :items-per-page="limit"
+                class="flex-shrink-0"
+              />
+            </div>
+          </div>
+        </UCard>
+      </div>
+    </BasePage>
+
+    <PropertyEditUnit
+      v-model:open="showUnitModal"
+      :unit="selectedUnit"
+      :property-id="propertyId"
+      @save="refresh"
+    />
+  </div>
+</template>
+
+<script lang="ts" setup>
+import type { Property, Unit } from '~/types/property'
+
+definePageMeta({
+  layout: 'default',
+})
+
+const { user } = useUserSession()
+
+const propertyId = String(user.value?.properties?.[0]?.propertyId || '')
+const showUnitModal = ref(false)
+const selectedUnit = ref<Unit | null>(null)
+
+const currentPage = ref(1)
+const limit = ref(10)
+
+const { data, status, refresh } = await useLazyAsyncData(
+  'TENENTSPROPERTY',
+  () => {
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+      limit: limit.value.toString(),
+    })
+
+    return $fetch<{
+      res: {
+        property: Property
+        stats: {
+          totalFloors: number
+          totalUnits: number
+          occupiedUnits: number
+          vacancyRate: string
+        }
+      }
+      pagination: {
+        page: number
+        limit: number
+        total: number
+        pages: number
+      }
+    }>(`/api/properties/${propertyId}?${queryParams.toString()}`)
+  },
+  {
+    watch: [currentPage, limit],
+  },
+)
+
+watch(limit, () => {
+  currentPage.value = 1
+})
+
+// function showUnitDetails(unit: Unit, floorId: string) {
+//   selectedUnit.value = {
+//     ...unit,
+//     floorId,
+//   } as any
+
+//   showUnitModal.value = true
+// }
+</script>
