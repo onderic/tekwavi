@@ -50,11 +50,9 @@
         <ClientOnly>
           <BillingPaymentMethods />
         </ClientOnly>
-        <ClientOnly>
-          <BillingPropertyUsageOverTime
-            :invoices="billingData?.invoices || []"
-          />
-        </ClientOnly>
+        <BillingPropertyUsageOverTime
+          :invoices="billingData?.invoices || []"
+        />
       </div>
     </div>
   </BasePage>

@@ -67,8 +67,7 @@ export default defineNuxtConfig({
     JWT_SECRET: process.env.NUXT_PUBLIC_JWT_SECRET,
     session: {
       password: process.env.NUXT_SESSION_PASSWORD || '',
-      // maxAge: 60 * 60 * 24,
-      maxAge: 60 * 2,
+      maxAge: 60 * 60 * 24,
     },
     MPESA: {
       SHORTCODE: process.env.NUXT_PUBLIC_MPESA_SHORTCODE ? Number(process.env.NUXT_PUBLIC_MPESA_SHORTCODE) : undefined,
