@@ -35,8 +35,9 @@
   },
   "devDependencies": {
     "@types/lodash": "^4",
-    "nodemailer": "^7.0.5",
+    "nodemailer": "^6.9.13",
     "nuxt-nodemailer": "^1.1.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^6.0.0"
   }
 }
