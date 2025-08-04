@@ -23,6 +23,7 @@
     "mongoose": "^8.17.0",
     "nuxt": "^4.0.1",
     "nuxt-auth-utils": "0.5.22",
+    "nuxt-nodemailer": "^1.1.2",
     "pinia": "^3.0.3",
     "ua-parser-js": "^2.0.4",
     "vue": "^3.5.18",
@@ -36,8 +37,9 @@
   "devDependencies": {
     "@types/lodash": "^4",
     "nodemailer": "^7.0.5",
-    "nuxt-nodemailer": "^1.1.2",
+    "nodemailer": "^6.10.1",
     "typescript": "^5.9.2",
     "vite": "^6.0.0"
-  }
+  },
+   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

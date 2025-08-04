@@ -87,6 +87,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
   nitro: {
+    preset: 'node', // default is fine, just don’t use 'static' if you're SSR
+  },
+
+  nitro: {
     experimental: {
       tasks: process.env.NODE_ENV === 'production',
     },
