@@ -420,7 +420,7 @@ const baseMenus: NavigationMenuItem[] = [
   {
     label: 'Dashboard',
     icon: 'i-lucide-home',
-    to: '/dashboard',
+    to: '/',
   },
   {
     label: 'Notifications',
