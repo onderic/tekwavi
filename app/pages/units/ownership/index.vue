@@ -56,7 +56,7 @@
         :columns="columns"
         class="flex-1"
         :empty-state="{
-          icon: 'i-lucide-home-x',
+          icon: 'i-lucide-building-x',
           label: 'No units found',
         }"
         @select="(row: any) => {
