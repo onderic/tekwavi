@@ -38,27 +38,14 @@
           :items="items"
           :icon="'i-lucide-folder'"
           size="sm"
-          class="w-full  py-1"
+          class="w-full py-1"
           searchable
           placeholder="Select property"
           @update:model-value="handleSelectionChange"
         >
           <template #empty>
             <div class="p-2 text-center text-sm text-gray-500 dark:text-white/70">
-              <div v-if="status === 'pending'">
-                Loading properties...
-              </div>
-              <div v-else>
-                <UButton
-                  variant="solid"
-                  size="sm"
-                  color="secondary"
-                  icon="i-lucide-refresh-cw"
-                  label="Refresh"
-                  class="text-gray-900 dark:text-white border-gray-300 dark:border-white/30 hover:bg-gray-100 dark:hover:bg-white/10"
-                  @click="refresh()"
-                />
-              </div>
+              No properties available
             </div>
           </template>
         </USelectMenu>
@@ -117,7 +104,6 @@
 
 <script setup lang="ts">
 import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
-import type { Property } from '~/types/property'
 import { UserRole } from '~~/shared/enums/roles'
 import developerMenu from '~/menus/developer'
 import adminMenu from '~/menus/admin'
@@ -125,13 +111,6 @@ import caretakerMenu from '~/menus/caretaker'
 import tenantMenu from '~/menus/tenant'
 import { usePropertyStore } from '~/stores/usePropertyStore'
 import ownerMenu from '~/menus/owner'
-
-type PropertyItem = {
-  id: string | undefined
-  label: string
-  description: string
-  property: Property
-}
 
 const { user } = useUserSession()
 const { isDark, toggleColorMode, setColorMode, isSidebarOpen, closeSidebar } = useDashboard()
@@ -142,33 +121,13 @@ const route = useRoute()
 const propertyStore = usePropertyStore()
 const { logout } = useLogout()
 
-const showPropertySelector = computed(() =>
-  user.value?.role === UserRole.ADMIN || user.value?.role === UserRole.DEVELOPER,
-)
+const propertiesStore = usePropertiesStore()
 
-const { data: propertiesData, status, refresh } = showPropertySelector.value
-  ? useFetch<{
-    properties: Property[]
-  }>('/api/properties/list', {
-      default: () => ({ properties: [] }),
-      watch: [
-        () => user.value?.ownedProperties,
-        () => propertyStore.propertyChanged,
-      ],
-      immediate: showPropertySelector.value,
-    })
-  : {
-      data: ref({ properties: [] }),
-      status: ref('success'),
-      refresh: () => Promise.resolve(),
-    }
-
-defineExpose({ refresh })
-
+// Get properties from dedicated store
 const propertyItems = computed(() => {
-  if (!propertiesData.value?.properties) return []
+  if (!propertiesStore.properties.length) return []
 
-  return propertiesData.value.properties.map(property => ({
+  return propertiesStore.properties.map(property => ({
     id: property._id,
     label: property.propertyName,
     description: property.address ? `${property.address.city}, ${property.address.country}` : '',
@@ -206,14 +165,13 @@ const items: ComputedRef<DropdownMenuItem[][]> = computed(() => [
   ],
 ])
 
-const selectedProperty = ref<PropertyItem | undefined>(undefined)
-const isUpdatingFromStore = ref(false)
-const previousSelectedProperty = ref<PropertyItem | undefined>(undefined)
+// Simple selection based on stored property
+const selectedProperty = computed(() => {
+  if (!propertyStore.currentProperty) return undefined
 
-watch(selectedProperty, (newValue) => {
-  if (newValue && newValue.property) {
-    previousSelectedProperty.value = newValue
-  }
+  return propertyItems.value.find(
+    item => item.id === propertyStore.currentProperty._id,
+  )
 })
 
 const handleSelectionChange = (selectedItem: any) => {
@@ -221,88 +179,23 @@ const handleSelectionChange = (selectedItem: any) => {
     if (selectedItem.onSelect) {
       selectedItem.onSelect()
     }
-    nextTick(() => {
-      selectedProperty.value = previousSelectedProperty.value
-    })
     return
   }
 
   if (selectedItem && selectedItem.property) {
-    selectedProperty.value = selectedItem
-    if (!isUpdatingFromStore.value) {
-      propertyStore.setCurrentProperty(selectedItem.property)
-      toast.add({
-        title: `Switched to ${selectedItem.label}`,
-        icon: 'i-lucide-building',
-        color: 'primary',
-      })
-      closeOnMobile()
+    propertyStore.setCurrentProperty(selectedItem.property)
+    toast.add({
+      title: `Switched to ${selectedItem.label}`,
+      icon: 'i-lucide-building',
+      color: 'primary',
+    })
+    closeOnMobile()
 
-      if (route.path === '/properties/listing') {
-        router.push('/properties')
-      }
+    if (route.path === '/properties/listing') {
+      router.push('/properties')
     }
   }
 }
-
-watch(() => propertyStore.currentProperty, (newCurrentProperty) => {
-  if (newCurrentProperty && propertyItems.value.length > 0) {
-    const matchingItem = propertyItems.value.find(
-      item => item.id === newCurrentProperty._id,
-    )
-
-    if (matchingItem && (!selectedProperty.value || selectedProperty.value.id !== matchingItem.id)) {
-      isUpdatingFromStore.value = true
-      selectedProperty.value = matchingItem
-      previousSelectedProperty.value = matchingItem
-      nextTick(() => {
-        isUpdatingFromStore.value = false
-      })
-    }
-  }
-}, { immediate: true })
-
-watch(() => propertyItems.value, (newItems) => {
-  if (propertyStore.currentProperty && propertyStore.currentProperty._id && newItems.length > 0) {
-    const matchingItem = newItems.find(
-      item => item.id === propertyStore.currentProperty._id,
-    )
-
-    if (matchingItem && (!selectedProperty.value || selectedProperty.value.id !== matchingItem.id)) {
-      isUpdatingFromStore.value = true
-      selectedProperty.value = matchingItem
-      previousSelectedProperty.value = matchingItem
-      nextTick(() => {
-        isUpdatingFromStore.value = false
-      })
-    }
-  }
-}, { immediate: true })
-
-watchEffect(() => {
-  if (propertyItems.value.length && !selectedProperty.value) {
-    if (propertyStore.currentProperty?._id) {
-      const storedProperty = propertyItems.value.find(
-        item => item.id === propertyStore.currentProperty?._id,
-      )
-      if (storedProperty) {
-        selectedProperty.value = storedProperty as PropertyItem
-        previousSelectedProperty.value = storedProperty as PropertyItem
-        return
-      }
-    }
-    const firstProperty = propertyItems.value[0]
-    if (firstProperty) {
-      selectedProperty.value = firstProperty as PropertyItem
-      previousSelectedProperty.value = firstProperty as PropertyItem
-      if (propertyStore.setCurrentProperty) {
-        propertyStore.setCurrentProperty(firstProperty.property)
-      }
-    }
-  }
-})
-
-provide('selectedProperty', selectedProperty)
 
 const closeOnMobile = () => {
   if (import.meta.client && window.innerWidth < 768) {
