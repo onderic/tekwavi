@@ -585,7 +585,7 @@ definePageMeta({
   title: 'Disbursements',
 })
 
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 const { formatCurrency, formatDate } = useFormatters()
 const { formatFloorNumber } = useFormatFloor()
 const toast = useToast()
@@ -677,7 +677,8 @@ const { data, status, refresh } = await useLazyAsyncData<DisbursementResponse | 
     return $fetch<DisbursementResponse>(`/api/invoices/disbursements?${params.toString()}`)
   },
   {
-    watch: [propertyId, monthFilter, yearFilter, () => propertyChanged],
+    watch: [propertyId, monthFilter, yearFilter],
+    server: false,
   },
 )
 

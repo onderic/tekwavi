@@ -398,7 +398,7 @@ const columns: TableColumn<UnitOwnership>[] = [
   },
 ]
 
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 
 const { data, status, refresh } = await useLazyAsyncData(
   'UnitOwners',
@@ -426,7 +426,8 @@ const { data, status, refresh } = await useLazyAsyncData(
     }>(`/api/properties/unitownership?${queryParams.toString()}`)
   },
   {
-    watch: [currentPage, limit, searchQuery, propertyId, computed(() => propertyChanged), ownershipTypeFilter, statusFilter],
+    watch: [currentPage, limit, searchQuery, propertyId, ownershipTypeFilter, statusFilter],
+    server: false,
     default: () => ({
       property: null,
       owners: [],

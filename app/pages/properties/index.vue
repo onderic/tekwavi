@@ -388,6 +388,7 @@ const { data, status, refresh } = await useLazyAsyncData(
   },
   {
     watch: [currentPage, limit, propertyId],
+    server: false,
   },
 )
 

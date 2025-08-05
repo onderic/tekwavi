@@ -112,6 +112,7 @@ const { data: notifications, status, refresh } = useLazyAsyncData(
   },
   {
     watch: [() => user.value?.email, () => user.value?.phone],
+    server: false,
     default: () => [],
   },
 )

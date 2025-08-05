@@ -30,7 +30,7 @@ interface ApiResponse {
     }
   }
 }
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 const { formatCurrency, formatDate } = useFormatters()
 
 const currentPage = ref(1)
@@ -82,7 +82,8 @@ const { data, status } = await useLazyAsyncData<ApiResponse>(
     return $fetch<ApiResponse>(`/api/tenants?${queryParams.toString()}`)
   },
   {
-    watch: [currentPage, limit, searchQuery, statusFilter, rentalTypeFilter, propertyId, computed(() => propertyChanged)],
+    watch: [currentPage, limit, searchQuery, statusFilter, rentalTypeFilter, propertyId],
+    server: false,
   },
 )
 

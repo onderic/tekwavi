@@ -6,26 +6,26 @@
     :status="status === 'pending'"
   >
     <DashboardAdmin
-      v-if="userRole === 'admin'"
+      v-if="user?.role === 'admin'"
       :analytics="analyticsData"
     />
     <DashboardDeveloper
-      v-else-if="userRole === 'developer'"
+      v-else-if="user?.role === 'developer'"
       :analytics="analyticsData"
       :is-loading="status === 'pending'"
     />
     <DashboardUnitOwner
-      v-else-if="userRole === 'unit_owner'"
+      v-else-if="user?.role === 'unit_owner'"
       :analytics="analyticsData"
       :is-loading="status === 'pending'"
     />
     <DashboardCaretaker
-      v-else-if="userRole === 'caretaker'"
+      v-else-if="user?.role === 'caretaker'"
       :analytics="analyticsData"
       :is-loading="status === 'pending'"
     />
     <DashboardTenant
-      v-else-if="userRole === 'tenant'"
+      v-else-if="user?.role === 'tenant'"
       :tenant-data="data?.tenantUnits || {}"
       :loading="status === 'pending'"
       :selected-year="tenantSelectedYear"
@@ -33,13 +33,13 @@
       @update:selected-year="tenantSelectedYear = $event"
     />
     <DashboardDefault
-      v-else-if="userRole === 'normal'"
+      v-else-if="user?.role === 'normal'"
     />
 
     <!-- Pass notifications as props -->
     <ClientOnly>
       <BaseNotificationsSlideover
-        v-if="isUserSessionReady"
+        v-if="user?.role"
         :notifications="notifications"
         :loading="status === 'pending'"
         @refresh="refreshData"
@@ -57,46 +57,34 @@ definePageMeta({
 })
 
 const { user } = useUserSession()
-const { propertyId, userRole, propertyChanged } = useCurrentProperty()
-
+const { propertyId } = useCurrentProperty()
 const { dateRange, selectedPeriod } = useDateRange()
-
 const tenantSelectedYear = ref(new Date().getFullYear())
 
-const isUserSessionReady = computed(() => {
-  return user.value && user.value._id && userRole.value
-})
-
 const { data, status, refresh } = await useAsyncData(
-  () => `dashboardData-${userRole.value}`,
+  () => `dashboardData-${user?.value?.role}`,
   async () => {
-    if (!isUserSessionReady.value) {
+    if (!user.value?.role) {
       return { analytics: {}, notifications: [], tenantUnits: undefined }
     }
 
-    // Additional check to ensure user session is valid
-    if (!user.value?._id || !userRole.value) {
+    if ((user.value.role === 'developer' || user.value.role === 'caretaker') && !propertyId.value) {
       return { analytics: {}, notifications: [], tenantUnits: undefined }
     }
 
-    await nextTick()
-
-    if ((user?.value?.role === 'developer' || user?.value?.role === 'caretaker') && !propertyId.value) {
-      return { analytics: {}, notifications: [], tenantUnits: undefined }
-    }
     const params: Record<string, any> = {}
-    if (userRole.value !== 'admin' && propertyId.value) {
+    if (user.value.role !== 'admin' && propertyId.value) {
       params.propertyId = propertyId.value
     }
 
     // Add date range parameters for admin and developer roles
-    if ((userRole.value === 'admin' || userRole.value === 'developer') && dateRange.value) {
+    if ((user.value.role === 'admin' || user.value.role === 'developer') && dateRange.value) {
       params.startDate = dateRange.value.start.toISOString()
       params.endDate = dateRange.value.end.toISOString()
     }
 
     // For tenant, fetch notifications and tenant units data
-    if (userRole.value === 'tenant') {
+    if (user.value.role === 'tenant') {
       const [notifications, tenantUnits] = await Promise.all([
         $fetch<Notification[]>('/api/notifications', { query: params }),
         $fetch<any>('/api/tenants/units', { query: { year: tenantSelectedYear.value } }),
@@ -111,7 +99,7 @@ const { data, status, refresh } = await useAsyncData(
       caretaker: '/api/analytics/caretaker',
     }
 
-    const endpoint = apiEndpoints[userRole.value as keyof typeof apiEndpoints]
+    const endpoint = apiEndpoints[user.value.role as keyof typeof apiEndpoints]
 
     if (!endpoint) {
       return { analytics: {}, notifications: [], tenantUnits: undefined }
@@ -130,7 +118,7 @@ const { data, status, refresh } = await useAsyncData(
   },
   {
     default: () => ({ analytics: {}, notifications: [], tenantUnits: undefined }),
-    watch: [isUserSessionReady, propertyId, computed(() => propertyChanged), userRole, dateRange, selectedPeriod, tenantSelectedYear],
+    watch: [user, propertyId, dateRange, selectedPeriod, tenantSelectedYear],
     server: false,
   },
 )
@@ -143,15 +131,5 @@ const notifications = computed(() => data.value?.notifications || [])
 
 const refreshData = async () => {
   await refresh()
-}
-
-if (userRole.value !== 'tenant' || userRole.value !== 'normal') {
-  watchEffect(() => {
-    console.log(`Dashboard data for ${userRole.value}:`, {
-      propertyId: propertyId.value,
-      analytics: analyticsData.value,
-      rawData: data.value,
-    })
-  })
 }
 </script>

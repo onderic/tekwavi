@@ -229,6 +229,7 @@ const { data, refresh } = await useLazyAsyncData(
   },
   {
     watch: [currentPage, perPage, statusFilter, searchTerm, propertyId],
+    server: false,
   },
 )
 

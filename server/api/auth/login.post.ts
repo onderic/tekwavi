@@ -1,5 +1,6 @@
 import type { User } from '#auth-utils'
 import { User as UserModel } from '~~/server/models/User'
+import { Property as PropertyModel } from '~~/server/models/Property'
 
 export default defineEventHandler(async (event) => {
   const { phone, password } = await readBody(event)
@@ -44,6 +45,21 @@ export default defineEventHandler(async (event) => {
   }
 
   delete user.password
+
+  // If user is a developer, lookup corresponding properties
+  if (user.role === 'developer' && user.ownedProperties && user.ownedProperties.length > 0) {
+    const properties = await PropertyModel.find({
+      _id: { $in: user.ownedProperties },
+    })
+      .select('_id propertyName address')
+      .lean()
+
+    user.properties = properties.map(property => ({
+      id: property._id.toString(),
+      name: property.propertyName,
+      address: `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.postalCode}`,
+    }))
+  }
 
   await UserModel.findByIdAndUpdate(user._id, {
     lastLogin: new Date(),

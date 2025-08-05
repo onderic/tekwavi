@@ -218,7 +218,7 @@ definePageMeta({
   title: 'Service Fees',
 })
 
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 const toast = useToast()
 
 const showEditModal = ref(false)
@@ -236,7 +236,8 @@ const { data: feeData, status, refresh } = await useLazyAsyncData(
     })
   },
   {
-    watch: [propertyId, () => propertyChanged],
+    watch: [propertyId],
+    server: false,
   },
 )
 

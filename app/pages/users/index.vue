@@ -59,6 +59,8 @@ const { data, status, refresh } = await useLazyAsyncData('UsersList', async () =
     users,
     pending,
   }
+}, {
+  server: false,
 })
 
 function getInitials(firstName: string, lastName?: string): string {

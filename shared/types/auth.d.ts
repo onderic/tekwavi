@@ -19,6 +19,13 @@ declare module '#auth-utils' {
     rentedUnits?: string[]
     assignedProperty?: string | null
 
+    // Developer properties (populated for developer role)
+    properties?: {
+      id: string
+      name: string
+      address: string
+    }[]
+
     // Password reset fields
     tempPasswordExpiry?: Date | null
     tempPasswordUsed?: boolean

@@ -307,6 +307,7 @@ const { data, status, refresh } = await useLazyAsyncData(
   },
   {
     watch: [currentPage, perPage, statusFilter, priorityFilter],
+    server: false,
   },
 )
 

@@ -250,6 +250,7 @@ const { data: paymentSettingsData, status, refresh } = useLazyAsyncData(
   },
   {
     watch: [propertyId],
+    server: false,
     default: () => ({ success: false, data: null }),
   },
 )

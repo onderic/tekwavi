@@ -832,6 +832,7 @@ const { data, status, error, refresh } = await useLazyAsyncData(
   () => $fetch<{ unit: Unit, property: Property, floor: Floor }>(`/api/properties/unitownership/${unitId.value}`),
   {
     default: () => ({ unit: null, property: null, floor: null }),
+    server: false,
   },
 )
 
@@ -880,7 +881,7 @@ const getUnitTypeIcon = (type: string | undefined) => {
 }
 
 const getStatusColor = (status: string | undefined) => {
-  const colors: Record<string, 'success' | 'warning' | 'primary' | 'secondary' | 'tertiary' | 'info' | 'neutral' | 'error'> = {
+  const colors: Record<string, 'success' | 'warning' | 'primary' | 'secondary' | 'info' | 'neutral' | 'error'> = {
     available: 'success',
     rented: 'warning',
     maintenance: 'warning',

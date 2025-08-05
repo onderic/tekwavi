@@ -157,6 +157,7 @@
 
 <script lang="ts" setup>
 import type { TableColumn } from '@nuxt/ui'
+import { useCurrentProperty } from '~/composables/useCurrentProperty'
 import type { Unit } from '~/types/property'
 
 definePageMeta({
@@ -168,7 +169,7 @@ type ExtendedUnit = Unit & {
   floorNumber: number
 }
 
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 
 const currentPage = ref(1)
 const limit = ref(20)
@@ -234,7 +235,8 @@ const { data, status } = await useLazyAsyncData<UnitsResponse>(
     return $fetch<UnitsResponse>(`/api/properties/${propertyId.value}/units?${queryParams.toString()}`)
   },
   {
-    watch: [currentPage, limit, searchQuery, statusFilter, floorFilter, propertyId, computed(() => propertyChanged)],
+    watch: [currentPage, limit, searchQuery, statusFilter, floorFilter, propertyId],
+    server: false,
   },
 )
 

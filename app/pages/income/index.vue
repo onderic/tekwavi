@@ -511,7 +511,7 @@ definePageMeta({
   title: 'Payments',
 })
 
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 const { formatCurrency, formatDate, formatPaymentMethod } = useFormatters()
 const { formatFloorNumber } = useFormatFloor()
 
@@ -660,8 +660,8 @@ const { data, status } = await useLazyAsyncData(
     }>(`/api/invoices?${queryParams.toString()}`)
   },
   {
-    watch: [currentPage, limit, searchQuery, statusFilter, monthFilter, yearFilter, propertyId,
-      () => propertyChanged],
+    watch: [currentPage, limit, searchQuery, statusFilter, monthFilter, yearFilter, propertyId],
+    server: false,
     default: () => ({
       invoices: [] as InvoiceListItem[],
       pagination: {
@@ -724,7 +724,7 @@ function viewInvoiceDetails(invoice: InvoiceListItem) {
   open.value = true
 }
 
-function getStatusColor(status: string): 'success' | 'error' | 'info' | 'warning' | 'primary' | 'secondary' | 'tertiary' | 'neutral' | undefined {
+function getStatusColor(status: string): 'success' | 'error' | 'info' | 'warning' | 'primary' | 'secondary' | 'neutral' | undefined {
   switch (status.toLowerCase()) {
     case 'paid':
       return 'success'

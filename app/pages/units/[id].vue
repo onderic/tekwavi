@@ -359,6 +359,7 @@ const { data: unitInfo, status, refresh } = useAsyncData(
   },
   {
     watch: [propertyId, unitId, selectedPaymentYear],
+    server: false,
   },
 )
 

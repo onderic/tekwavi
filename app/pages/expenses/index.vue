@@ -232,6 +232,7 @@ const { data, status, refresh } = await useLazyAsyncData(
   },
   {
     watch: [currentPage, limit, searchQuery, categoryFilter, dateFilter, propertyId],
+    server: false,
     default: () => ({
       expenses: [],
       pagination: {

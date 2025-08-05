@@ -85,7 +85,7 @@ const { data, pending, error, refresh } = await useLazyAsyncData(
   `user-${userId}`,
   () => $fetch<UserType>(`/api/users/${userId}`),
   {
-    immediate: true,
+    server: false,
     watch: [],
   },
 )

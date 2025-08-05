@@ -620,6 +620,9 @@ const outstandingColumns: TableColumn<OutstandingInvoice>[] = [
 const { data, status } = await useLazyAsyncData(
   `unit-details-${unitId}`,
   () => $fetch<UnitDetailsResponse>(`/api/properties/unitownership/owner/${unitId}`),
+  {
+    server: false,
+  },
 )
 </script>
 

@@ -292,6 +292,7 @@ const { data, status, refresh } = await useLazyAsyncData(
   },
   {
     watch: [currentPage, perPage, categoryFilter, statusFilter, searchQuery],
+    server: false,
   },
 )
 

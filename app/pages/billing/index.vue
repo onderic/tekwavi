@@ -16,40 +16,33 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
-        <ClientOnly>
-          <BillingSummary
-            :stats="billingData?.stats"
-            :next-billing="billingData?.nextBilling"
-            :current-month-status="billingData?.currentMonthStatus"
-            :loading="status === 'pending'"
-          />
-        </ClientOnly>
-        <ClientOnly>
-          <BillingMonthlyReceipts
-            :invoices="billingData?.invoices || []"
-            :loading="status === 'pending'"
-            @payment-completed="handlePaymentCompleted"
-          />
-        </ClientOnly>
-        <ClientOnly>
-          <BillingRecentTransactions
-            :invoices="paidInvoices"
-            :loading="status === 'pending'"
-          />
-        </ClientOnly>
+        <BillingSummary
+          :stats="billingData?.stats"
+          :next-billing="billingData?.nextBilling"
+          :current-month-status="billingData?.currentMonthStatus"
+          :loading="status === 'pending'"
+        />
+
+        <BillingMonthlyReceipts
+          :invoices="billingData?.invoices || []"
+          :loading="status === 'pending'"
+          @payment-completed="handlePaymentCompleted"
+        />
+
+        <BillingRecentTransactions
+          :invoices="paidInvoices"
+          :loading="status === 'pending'"
+        />
       </div>
 
       <div class="lg:col-span-1 space-y-6">
-        <ClientOnly>
-          <BillingMySubscription
-            :stats="billingData?.stats"
-            :next-billing="billingData?.nextBilling"
-            :loading="status === 'pending'"
-          />
-        </ClientOnly>
-        <ClientOnly>
-          <BillingPaymentMethods />
-        </ClientOnly>
+        <BillingMySubscription
+          :stats="billingData?.stats"
+          :next-billing="billingData?.nextBilling"
+          :loading="status === 'pending'"
+        />
+
+        <BillingPaymentMethods />
         <BillingPropertyUsageOverTime
           :invoices="billingData?.invoices || []"
         />
@@ -70,6 +63,7 @@ const { data, status, refresh } = await useAsyncData(
   () => $fetch<any>('/api/billing'),
   {
     default: () => null,
+    server: false,
   },
 )
 

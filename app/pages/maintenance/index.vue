@@ -370,7 +370,7 @@ const currentPage = ref(1)
 const perPage = ref(10)
 const updateLoading = ref(false)
 const newNote = ref('')
-const { propertyId, propertyChanged } = useCurrentProperty()
+const { propertyId } = useCurrentProperty()
 
 const { formatDate } = useFormatters()
 
@@ -396,8 +396,7 @@ const { data, status, refresh } = await useLazyAsyncData(
     }>(`/api/maintenance?${queryParams.toString()}`)
   },
   {
-    watch: [currentPage, perPage, statusFilter, priorityFilter, propertyId,
-      () => propertyChanged],
+    watch: [currentPage, perPage, statusFilter, priorityFilter, propertyId],
   },
 )
 
