@@ -316,7 +316,7 @@
           <div class="flex items-center h-full">
             <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-yellow-500/20 text-yellow-500">
               <UIcon
-                name="i-lucide-building-x"
+                name=""
                 class="w-6 h-6 lg:w-8 lg:h-8"
               />
             </div>
