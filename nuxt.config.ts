@@ -7,7 +7,6 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     'nuxt-nodemailer',
   ],
-  // ssr: false,
   devtools: { enabled: false },
 
   app: {
