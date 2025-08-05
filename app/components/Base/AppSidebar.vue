@@ -30,18 +30,18 @@
     </div>
     <div class="flex-1 overflow-y-auto px-5 sidebar-scroll">
       <div
-        v-if="(currentRole === 'developer' || currentRole === 'admin')"
+        v-if="(currentRole === 'developer' || currentRole === 'admin') && userProperties.length > 0"
         class="mb-4"
       >
         <USelectMenu
           v-model="selectedProperty"
-          :items="items"
+          :items="propertySelectItems"
           :icon="'i-lucide-folder'"
           size="sm"
           class="w-full py-1"
           searchable
           placeholder="Select property"
-          @update:model-value="handleSelectionChange"
+          @update:model-value="handlePropertySelection"
         >
           <template #empty>
             <div class="p-2 text-center text-sm text-gray-500 dark:text-white/70">
@@ -109,88 +109,58 @@ import developerMenu from '~/menus/developer'
 import adminMenu from '~/menus/admin'
 import caretakerMenu from '~/menus/caretaker'
 import tenantMenu from '~/menus/tenant'
-import { usePropertyStore } from '~/stores/usePropertyStore'
 import ownerMenu from '~/menus/owner'
+import { useCurrentProperty } from '~/composables/useCurrentProperty'
 
 const { user } = useUserSession()
 const { isDark, toggleColorMode, setColorMode, isSidebarOpen, closeSidebar } = useDashboard()
+const { setCurrentProperty, propertyId } = useCurrentProperty()
 const toast = useToast()
 const router = useRouter()
 const route = useRoute()
 
-const propertyStore = usePropertyStore()
 const { logout } = useLogout()
 
-const propertiesStore = usePropertiesStore()
+// Get user properties directly from user session
+const userProperties = computed(() => {
+  return user.value?.properties || []
+})
 
-// Get properties from dedicated store
-const propertyItems = computed(() => {
-  if (!propertiesStore.properties.length) return []
+// Convert user properties to select menu items
+const propertySelectItems = computed(() => {
+  if (!userProperties.value.length) return []
 
-  return propertiesStore.properties.map(property => ({
-    id: property._id,
-    label: property.propertyName,
-    description: property.address ? `${property.address.city}, ${property.address.country}` : '',
-    property: property,
+  return userProperties.value.map(property => ({
+    id: property.id,
+    label: property.name,
+    description: property.address,
+    value: property.id,
   }))
 })
 
-const items: ComputedRef<DropdownMenuItem[][]> = computed(() => [
-  propertyItems.value,
-  [
-    {
-      label: 'View All Properties',
-      icon: 'i-lucide-eye',
-      onSelect: () => {
-        router.push('/properties/listing')
-        closeOnMobile()
-      },
-      disabled: false,
-      class: 'pointer-events-auto',
-      _nonSelectable: true,
-      _isActionButton: true,
-    },
-    {
-      label: 'New Property',
-      icon: 'i-lucide-plus',
-      onSelect: () => {
-        router.push('/properties/listing')
-        closeOnMobile()
-      },
-      disabled: false,
-      class: 'pointer-events-auto',
-      _nonSelectable: true,
-      _isActionButton: true,
-    },
-  ],
-])
-
-// Simple selection based on stored property
-const selectedProperty = computed(() => {
-  if (!propertyStore.currentProperty) return undefined
-
-  return propertyItems.value.find(
-    item => item.id === propertyStore.currentProperty._id,
-  )
+const selectedProperty = computed({
+  get: () => {
+    if (!propertyId.value) return undefined
+    return propertySelectItems.value.find(item => item.id === propertyId.value) || undefined
+  },
+  set: (value) => {
+    setCurrentProperty(value?.id || null)
+  },
 })
 
-const handleSelectionChange = (selectedItem: any) => {
-  if (selectedItem && selectedItem._isActionButton) {
-    if (selectedItem.onSelect) {
-      selectedItem.onSelect()
-    }
-    return
-  }
+const handlePropertySelection = (selectedItem: any) => {
+  if (selectedItem && selectedItem.id) {
+    setCurrentProperty(selectedItem.id)
 
-  if (selectedItem && selectedItem.property) {
-    propertyStore.setCurrentProperty(selectedItem.property)
     toast.add({
       title: `Switched to ${selectedItem.label}`,
       icon: 'i-lucide-building',
       color: 'primary',
     })
+
     closeOnMobile()
 
+    // Navigate away from properties listing if we're there
     if (route.path === '/properties/listing') {
       router.push('/properties')
     }
