@@ -8,7 +8,7 @@ const { fetch } = useUserSession()
 const toast = useToast()
 const isLoading = ref(false)
 
-const handleLogin = async (form: { email: string, password: string }) => {
+const handleLogin = async (form: { phone: string, password: string }) => {
   if (isLoading.value) return
 
   isLoading.value = true
