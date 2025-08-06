@@ -14,7 +14,7 @@
           <img
             :src="selectedProperty?.logo ? `${$config.public.APP_URL}${selectedProperty.logo}` : '/logo.png'"
             :alt="selectedProperty?.name || 'Amaam'"
-            class="h-10 w-10 rounded-lg object-cover  shadow-sm"
+            class="h-8 w-8 rounded-lg object-cover  shadow-sm"
           >
         </div>
         <div class="min-w-0 flex-1">
