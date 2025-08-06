@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { z } from 'zod'
+import type { FormSubmitEvent } from '#ui/types'
 
-const props = defineProps({
+const _props = defineProps({
   loading: {
     type: Boolean,
     default: false,
@@ -17,6 +18,9 @@ const schema = z
       .refine(val => val.trim().length > 0, 'Phone number is required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
+    first_name: z.string().min(1, 'First name is required'),
+    last_name: z.string().min(1, 'Last name is required'),
+    email: z.string().email('Invalid email address').optional(),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords don\'t match',
@@ -30,12 +34,12 @@ const form = ref({
   first_name: '',
   last_name: '',
   email: '',
-  role: 'normal',
 })
 
-const handleSubmit = async (event: Event) => {
-  event.preventDefault()
-  const { confirmPassword, ...registerData } = form.value
+const handleSubmit = async (event: FormSubmitEvent<any>) => {
+  const { confirmPassword, ...registerData } = event.data
+
+  // Generate email if not provided
   if (!registerData.email) {
     registerData.email = `user${registerData.phone}@homeae.local`
   }
@@ -47,7 +51,7 @@ const handleSubmit = async (event: Event) => {
 <template>
   <div class="min-h-screen flex items-center justify-center px-4 py-12 bg-gray-50 dark:bg-gray-900">
     <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8">
-      <h1 class="text-2xl font-bold mb-6 text-center">
+      <h1 class="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">
         Create an Account
       </h1>
 
@@ -57,6 +61,34 @@ const handleSubmit = async (event: Event) => {
         class="space-y-4"
         @submit="handleSubmit"
       >
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UFormField
+            label="First Name"
+            name="first_name"
+            required
+          >
+            <UInput
+              v-model="form.first_name"
+              :disabled="loading"
+              autocomplete="given-name"
+              placeholder="John"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Last Name"
+            name="last_name"
+            required
+          >
+            <UInput
+              v-model="form.last_name"
+              :disabled="loading"
+              autocomplete="family-name"
+              placeholder="Doe"
+            />
+          </UFormField>
+        </div>
+
         <UFormField
           label="Phone Number"
           name="phone"
@@ -64,12 +96,28 @@ const handleSubmit = async (event: Event) => {
         >
           <UInput
             v-model="form.phone"
-            :disabled="props.loading"
+            :disabled="loading"
             autocomplete="tel"
             placeholder="e.g. 0712345678"
           />
           <template #hint>
             <span class="text-xs text-gray-500">Enter your 10-digit phone number</span>
+          </template>
+        </UFormField>
+
+        <UFormField
+          label="Email (Optional)"
+          name="email"
+        >
+          <UInput
+            v-model="form.email"
+            type="email"
+            :disabled="loading"
+            autocomplete="email"
+            placeholder="john@example.com"
+          />
+          <template #hint>
+            <span class="text-xs text-gray-500">Leave blank to auto-generate</span>
           </template>
         </UFormField>
 
@@ -81,7 +129,7 @@ const handleSubmit = async (event: Event) => {
           <UInput
             v-model="form.password"
             type="password"
-            :disabled="props.loading"
+            :disabled="loading"
             autocomplete="new-password"
           />
         </UFormField>
@@ -94,7 +142,7 @@ const handleSubmit = async (event: Event) => {
           <UInput
             v-model="form.confirmPassword"
             type="password"
-            :disabled="props.loading"
+            :disabled="loading"
             autocomplete="new-password"
           />
         </UFormField>
@@ -104,10 +152,10 @@ const handleSubmit = async (event: Event) => {
           color="primary"
           icon="i-lucide:user-plus"
           block
-          :loading="props.loading"
-          :disabled="props.loading"
+          :loading="loading"
+          :disabled="loading"
         >
-          {{ props.loading ? 'Creating Account...' : 'Create Account' }}
+          {{ loading ? 'Creating Account...' : 'Create Account' }}
         </UButton>
 
         <div class="mt-4 text-center">
