@@ -22,18 +22,18 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#405189', media: '(prefers-color-scheme: light)' },
       ],
       link: [
-        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/pwa-16x16.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon.png' },
         {
           rel: 'icon',
           type: 'image/png',
           sizes: '16x16',
-          href: '/pwa-16x16.png',
+          href: '/favicon.png',
         },
         {
           rel: 'icon',
           type: 'image/png',
           sizes: '32x32',
-          href: '/pwa-32x32.png',
+          href: '/favicon.png',
         },
       ],
     },
@@ -69,7 +69,7 @@ export default defineNuxtConfig({
     },
     public: {
       APP_NAME: process.env.NUXT_PUBLIC_APP_NAME,
-      APP_URL: process.env.NUXT_PUBLIC_APP_URL || 'https://black-coast-06202c000.2.azurestaticapps.net/',
+      APP_URL: process.env.NUXT_PUBLIC_APP_URL,
     },
   },
 
