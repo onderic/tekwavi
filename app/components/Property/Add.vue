@@ -353,7 +353,6 @@ const emit = defineEmits(['update:isOpen', 'property:added'])
 
 const isLoading = ref(false)
 const toast = useToast()
-const propertyStore = usePropertyStore()
 const { fetch } = useUserSession()
 
 const categoryOptions = Object.values(FlatCategory).map(category => ({
@@ -531,7 +530,9 @@ const addProperty = async (event: FormSubmitEvent<z.infer<typeof schema>>) => {
     await fetch()
 
     if (propertyResponse.property) {
-      propertyStore.setCurrentProperty(propertyResponse.property)
+      // Use the composable instead of propertyStore
+      const { setCurrentProperty } = useCurrentProperty()
+      setCurrentProperty(propertyResponse.property._id.toString())
 
       await nextTick()
       navigateTo('/properties')
