@@ -33,7 +33,7 @@ const propertySchema = new Schema({
     notes: { type: String },
     lastUpdated: { type: Date, default: Date.now },
   },
-
+  logo: { type: String, trim: true }, // URL or path to logo image
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: true, versionKey: false })
