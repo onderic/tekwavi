@@ -44,100 +44,7 @@
       </div>
     </div>
 
-    <div class="space-y-6 print:hidden ">
-      <!-- <div class="grid grid-cols-1 md:grid-cols-2  lg:grid-cols-5 gap-4 mb-8 print:hidden">
-        <UCard>
-          <div class="flex items-center">
-            <div class="rounded-full bg-primary-50 dark:bg-primary-900 p-3 mr-3">
-              <UIcon
-                name="i-lucide-credit-card"
-                class="w-5 h-5 text-primary-500 dark:text-primary-400"
-              />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Total Revenue
-              </p>
-              <p class="text-xl font-medium text-gray-900 dark:text-white">
-                {{ formatCurrency(summaryStats.totalIncome) }}
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center">
-            <div class="rounded-full bg-info-50 dark:bg-info-900 p-3 mr-3">
-              <UIcon
-                name="i-lucide-target"
-                class="w-5 h-5 text-info-500 dark:text-info-400"
-              />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Expected {{ getFilterPeriodText() }}
-              </p>
-              <p class="text-xl font-medium text-gray-900 dark:text-white">
-                {{ formatCurrency(summaryStats.thisMonthExpectedRevenue) }}
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center">
-            <div class="rounded-full bg-success-50 dark:bg-success-900 p-3 mr-3">
-              <UIcon
-                name="i-lucide-circle-check"
-                class="w-5 h-5 text-success-500 dark:text-success-400"
-              />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Collected {{ getFilterPeriodText() }}
-              </p>
-              <p class="text-xl font-medium text-gray-900 dark:text-white">
-                {{ formatCurrency(summaryStats.thisMonthIncome) }}
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center">
-            <div class="rounded-full bg-warning-50 dark:bg-warning-900 p-3 mr-3">
-              <UIcon
-                name="i-lucide-alert-circle"
-                class="w-5 h-5 text-warning-500 dark:text-warning-400"
-              />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Outstanding
-              </p>
-              <p class="text-xl font-medium text-gray-900 dark:text-white">
-                {{ formatCurrency(summaryStats.outstandingAmount) }}
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <UCard>
-          <div class="flex items-center">
-            <div class="rounded-full bg-purple-50 dark:bg-purple-900 p-3 mr-3">
-              <UIcon
-                name="i-lucide-trending-up"
-                class="w-5 h-5 text-purple-500 dark:text-purple-400"
-              />
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                Collection Rate
-              </p>
-              <p class="text-xl font-medium text-gray-900 dark:text-white">
-                {{ summaryStats.collectionRate || 0 }}%
-              </p>
-            </div>
-          </div>
-        </UCard>
-      </div> -->
-
+    <div class="space-y-6 print:hidden">
       <!-- Filters and Table -->
       <UCard>
         <template #header>
@@ -154,16 +61,15 @@
                     {
                       label: 'Export to CSV',
                       icon: 'i-lucide-file-text',
-
                     },
                     {
                       label: 'Export to Excel',
                       icon: 'i-lucide-file-spreadsheet',
-
                     },
                     {
                       label: 'Print Invoices',
                       icon: 'i-lucide-printer',
+                      click: () => printReceipt(),
                     },
                   ],
                 ]"
@@ -173,7 +79,6 @@
                   variant="ghost"
                   icon="i-lucide-download"
                   size="sm"
-                  @click="print()"
                 >
                   Export
                 </UButton>
@@ -357,149 +262,12 @@
       </UCard>
     </div>
 
-    <div
-      v-if="showPrintInvoice"
-      class="hidden print:block"
-    >
-      <ClientOnly>
-        <PrintsTenantInvoice :invoice-data="selectedInvoiceForPrint" />
-      </ClientOnly>
-    </div>
-
-    <div class="print:hidden">
-      <UModal
-        v-if="selectedInvoice"
-        v-model:open="open"
-        :title="`Invoice #${selectedInvoice.invoiceNumber}`"
-        size="lg"
-      >
-        <template #body>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center">
-              <UBadge
-                class="capitalize"
-                :color="getStatusColor(selectedInvoice.status)"
-              >
-                {{ selectedInvoice.status }}
-              </UBadge>
-              <p class="text-sm text-gray-500">
-                {{ formatDate(selectedInvoice.paymentDate) }}
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Tenant
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.tenantName }}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Total Amount
-                </h3>
-                <p class="font-medium">
-                  {{ formatCurrency(selectedInvoice.totalAmount) }}
-                </p>
-                <div
-                  v-if="selectedInvoice.totalServiceCharges && selectedInvoice.totalServiceCharges > 0"
-                  class="text-sm text-gray-500"
-                >
-                  Rent: {{ formatCurrency(selectedInvoice.amount) }}<br>
-                  Services: {{ formatCurrency(selectedInvoice.totalServiceCharges) }}
-                </div>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Property
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.propertyName }}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Unit
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.unitNumber }}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Payment Method
-                </h3>
-                <p class="font-medium capitalize">
-                  {{ formatPaymentMethod(selectedInvoice.paymentMethod) }}
-                </p>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Period
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.paymentFor.monthName }} {{ selectedInvoice.paymentFor.year }}
-                </p>
-              </div>
-              <div v-if="selectedInvoice.paymentReferenceId">
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Reference ID
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.paymentReferenceId }}
-                </p>
-              </div>
-              <div v-if="selectedInvoice.phoneNumber">
-                <h3 class="text-sm font-medium text-gray-500 mb-1">
-                  Phone Number
-                </h3>
-                <p class="font-medium">
-                  {{ selectedInvoice.phoneNumber }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Service Charges Breakdown -->
-            <div
-              v-if="selectedInvoice.serviceCharges && selectedInvoice.serviceCharges.length > 0"
-              class="border-t pt-4"
-            >
-              <h3 class="text-sm font-medium text-gray-500 mb-2">
-                Service Charges
-              </h3>
-              <div class="space-y-1">
-                <div
-                  v-for="service in selectedInvoice.serviceCharges"
-                  :key="service.serviceId"
-                  class="flex justify-between text-sm"
-                >
-                  <span>{{ service.serviceName }}</span>
-                  <span class="font-medium">{{ formatCurrency(service.amount) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-between w-full mt-6">
-            <UButton
-              color="neutral"
-              @click="open = false"
-            >
-              Close
-            </UButton>
-            <UButton
-              color="primary"
-              icon="i-lucide-printer"
-              @click="print()"
-            >
-              Print Receipt
-            </UButton>
-          </div>
-        </template>
-      </UModal>
-    </div>
+    <PrintsTenantInvoice
+      v-if="selectedInvoice"
+      :invoice="selectedInvoice"
+      :tenant-info="tenantInfo"
+      :is-visible="isPrinting"
+    />
   </BasePage>
 </template>
 
@@ -511,24 +279,23 @@ definePageMeta({
   title: 'Payments',
 })
 
-const { propertyId } = useCurrentProperty()
+const { propertyId, currentProperty } = useCurrentProperty()
 const { formatCurrency, formatDate, formatPaymentMethod } = useFormatters()
 const { formatFloorNumber } = useFormatFloor()
 
 const now = new Date()
 const currentMonth = (now.getMonth() + 1).toString() // 1-12
 const currentYear = now.getFullYear()
-const showPrintInvoice = ref(false)
 
-const open = ref(false)
 const selectedInvoice = ref<InvoiceListItem | null>(null)
 const searchQuery = ref('')
 const statusFilter = ref('all')
-const monthFilter = ref(currentMonth)
+const monthFilter = ref('all')
 const yearFilter = ref(currentYear.toString())
 const currentPage = ref(1)
 const limit = ref(25)
-const selectedInvoiceForPrint = ref<any | null>(null)
+const tenantInfo = ref({ email: 'tenant@email.com' })
+const isPrinting = ref(false)
 
 const columns: TableColumn<InvoiceListItem>[] = [
   { accessorKey: 'invoiceNumber', header: 'Invoice #' },
@@ -570,7 +337,7 @@ const yearOptions = [
 const defaultFilters = {
   search: '',
   year: currentYear.toString(),
-  month: currentMonth,
+  month: 'all',
   status: 'all',
   page: 1,
 }
@@ -690,19 +457,6 @@ const { data, status } = await useLazyAsyncData(
 const invoices = computed(() => data.value?.invoices || [])
 const totalPages = computed(() => data.value?.pagination?.pages || 1)
 const totalInvoices = computed(() => data.value?.pagination?.total || 0)
-// const summaryStats = computed(() => data.value?.summary || {
-//   totalIncome: 0,
-//   thisMonthIncome: 0,
-//   outstandingAmount: 0,
-//   totalInvoices: 0,
-//   thisMonthExpectedRevenue: 0,
-//   collectionRate: 0,
-//   filters: {
-//     month: parseInt(currentMonth),
-//     year: currentYear,
-//     propertyId: null,
-//   },
-// })
 
 watch([searchQuery, statusFilter, monthFilter, yearFilter], () => {
   currentPage.value = 1
@@ -721,7 +475,7 @@ function getPaymentIcon(method: PaymentMethod) {
 
 function viewInvoiceDetails(invoice: InvoiceListItem) {
   selectedInvoice.value = invoice
-  open.value = true
+  // No need to set open.value since we're not using a modal
 }
 
 function getStatusColor(status: string): 'success' | 'error' | 'info' | 'warning' | 'primary' | 'secondary' | 'neutral' | undefined {
@@ -740,23 +494,6 @@ function getStatusColor(status: string): 'success' | 'error' | 'info' | 'warning
       return 'neutral'
   }
 }
-
-// function getFilterPeriodText() {
-//   if (monthFilter.value === 'all' && yearFilter.value === 'all') {
-//     return 'All Time'
-//   }
-//   else if (monthFilter.value === 'all') {
-//     return `in ${yearFilter.value}`
-//   }
-//   else if (yearFilter.value === 'all') {
-//     const monthName = monthOptions.find(m => m.value === monthFilter.value)?.label
-//     return monthName || 'This Month'
-//   }
-//   else {
-//     const monthName = monthOptions.find(m => m.value === monthFilter.value)?.label
-//     return `${monthName} ${yearFilter.value}`
-//   }
-// }
 
 function getActiveFiltersText() {
   const filters = []
@@ -782,46 +519,206 @@ function getActiveFiltersText() {
   return filters.join(', ')
 }
 
+function printReceipt() {
+  window.print()
+}
+
 function print(invoice?: any) {
   if (invoice) {
-    const transformedInvoice = {
-      invoiceNumber: invoice.invoiceNumber,
-      unitNumber: invoice.unitNumber,
-      serviceCharges: invoice.serviceCharges || [],
-      totalServiceCharges: invoice.totalServiceCharges || 0,
-      tenantName: invoice.tenantName,
-      amount: invoice.amount,
-      totalAmount: invoice.totalAmount,
-      paymentMethod: formatPaymentMethod(invoice.paymentMethod),
-      paymentReferenceId: invoice.paymentReferenceId || 'N/A',
-      phoneNumber: invoice.phoneNumber || 'N/A',
-      paymentDate: invoice.paymentDate,
-      dueDate: invoice.dueDate,
-      paymentFor: {
-        month: invoice.paymentFor.month,
-        monthName: invoice.paymentFor.monthName,
-        year: invoice.paymentFor.year,
-      },
-      recordedBy: invoice.recordedBy || 'System',
-      status: invoice.status,
-      createdAt: invoice.createdAt,
-      propertyDetails: {
-        propertyName: invoice.propertyName,
-        address: invoice.propertyAddress || 'N/A',
-        unitType: 'Apartment',
-      },
-    }
+    const originalTitle = document.title
 
-    selectedInvoiceForPrint.value = transformedInvoice
-    showPrintInvoice.value = true
+    selectedInvoice.value = invoice
+    isPrinting.value = true
 
-    setTimeout(() => {
+    // Wait for Vue to render the receipt card, then print
+    nextTick(() => {
+      // Set a unique document title for the receipt
+      // Format: Receipt_InvoiceNumber_TenantName_Date
+      const receiptDate = new Date(invoice.paymentDate).toISOString().split('T')[0]
+      const tenantName = invoice.tenantName.replace(/\s+/g, '_')
+      document.title = `Receipt_${invoice.invoiceNumber}_${tenantName}_${receiptDate}`
+
       window.print()
-    }, 100)
+
+      // Reset the printing state and document title after printing
+      setTimeout(() => {
+        isPrinting.value = false
+        selectedInvoice.value = null
+        document.title = originalTitle
+      }, 100)
+    })
   }
   else {
-    // If no invoice is passed, just print the page
+    // For printing the table view, set a general title
+    const originalTitle = document.title
+    const currentDate = new Date().toISOString().split('T')[0]
+    document.title = `Payment_Records_${currentProperty.value?.name || 'Property'}_${currentDate}`
+
     window.print()
+
+    // Restore original title
+    setTimeout(() => {
+      document.title = originalTitle
+    }, 100)
   }
 }
 </script>
+
+<style>
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+   /* Flexbox layout for print */
+  .print\:min-h-screen {
+    min-height: 100vh !important;
+  }
+
+  .print\:flex {
+    display: flex !important;
+  }
+
+  .print\:flex-col {
+    flex-direction: column !important;
+  }
+
+  .print\:flex-grow {
+    flex-grow: 1 !important;
+  }
+
+  .print\:mt-auto {
+    margin-top: auto !important;
+  }
+
+  /* Compact spacing for print */
+  .print\:p-6 {
+    padding: 1.5rem !important;
+  }
+
+  .print\:p-3 {
+    padding: 0.75rem !important;
+  }
+
+  .print\:px-8 {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  .print\:py-3 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .print\:py-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .print\:px-3 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .print\:mb-4 {
+    margin-bottom: 1rem !important;
+  }
+
+  .print\:mb-1 {
+    margin-bottom: 0.25rem !important;
+  }
+
+  .print\:mt-3 {
+    margin-top: 0.75rem !important;
+  }
+
+  .print\:mt-1 {
+    margin-top: 0.25rem !important;
+  }
+
+  .print\:gap-4 {
+    gap: 1rem !important;
+  }
+
+  .print\:gap-2 {
+    gap: 0.5rem !important;
+  }
+
+  /* Text size adjustments */
+  .print\:text-xl {
+    font-size: 1.25rem !important;
+  }
+
+  .print\:text-base {
+    font-size: 1rem !important;
+  }
+
+  .print\:text-sm {
+    font-size: 0.875rem !important;
+  }
+
+  .print\:text-xs {
+    font-size: 0.75rem !important;
+  }
+
+  .print\:text-\[10px\] {
+    font-size: 10px !important;
+  }
+
+  /* Logo size adjustment */
+  .print\:h-12 {
+    height: 3rem !important;
+  }
+
+  .print\:w-12 {
+    width: 3rem !important;
+  }
+
+  /* Ensure full width for print */
+  .print\:max-w-none {
+    max-width: none !important;
+  }
+
+  .print\:mx-0 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .print\:w-full {
+    width: 100% !important;
+  }
+
+  /* Hide elements not needed for print */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Show receipt when printing */
+  .print\:block {
+    display: block !important;
+  }
+
+  /* Ensure colors print properly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Fix table layout for print */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  /* Ensure proper page breaks */
+  .page-break-avoid {
+    page-break-inside: avoid !important;
+  }
+}
+</style>
