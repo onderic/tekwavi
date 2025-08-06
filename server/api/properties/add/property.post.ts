@@ -1,9 +1,10 @@
 import mongoose from 'mongoose'
+import type { User } from '#auth-utils'
 import { UserRole } from '~~/shared/enums/roles'
 import { canPerform } from '~~/server/utils/roles'
 import { Property } from '~~/server/models/Property'
 import { Floor } from '~~/server/models/Property/Floor'
-import { User } from '~~/server/models/User'
+import { User as UserModel } from '~~/server/models/User'
 import { createOrUpdateDeveloperBilling } from '~~/server/utils/billing'
 import { purgeAnalyticsCache } from '~~/server/utils/cacheUtils'
 import { handleLogoUpload } from '~~/server/utils/fileUpload'
@@ -29,13 +30,11 @@ export default defineEventHandler(async (event) => {
   session.startTransaction()
 
   try {
-    // Check if request is multipart (has file upload)
     const contentType = getHeader(event, 'content-type') || ''
     let propertyData
     let logoUrl = null
 
     if (contentType.includes('multipart/form-data')) {
-      // Handle file upload
       const formData = await readMultipartFormData(event)
 
       if (!formData) {
@@ -45,13 +44,11 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      // Use utility function to handle logo upload
       const uploadResult = await handleLogoUpload(formData)
       propertyData = uploadResult.data
       logoUrl = uploadResult.logoUrl
     }
     else {
-      // Handle regular JSON body (no file upload)
       propertyData = await readBody(event)
     }
 
@@ -100,7 +97,7 @@ export default defineEventHandler(async (event) => {
 
     let billingResult = null
     if (user.role === UserRole.DEVELOPER) {
-      await User.findByIdAndUpdate(
+      await UserModel.findByIdAndUpdate(
         user._id,
         { $addToSet: { ownedProperties: savedProperty._id } },
         { session },
@@ -116,17 +113,28 @@ export default defineEventHandler(async (event) => {
 
     await session.commitTransaction()
 
-    const updatedUser = await User.findById(user._id)
-      .select('-password')
+    const currentSession = await getUserSession(event)
 
-    if (updatedUser) {
-      await setUserSession(event, {
-        user: updatedUser,
-        loggedInAt: user.lastLogin || new Date(),
-      })
+    const newProperty = {
+      id: savedProperty._id.toString(),
+      name: savedProperty.propertyName,
+      logo: savedProperty.logo || null,
+      address: `${savedProperty.address.street}, ${savedProperty.address.city}, ${savedProperty.address.state} ${savedProperty.address.postalCode}`,
     }
 
+    const updatedUser: User = {
+      ...user,
+      properties: [...(user.properties || []), newProperty],
+      ownedProperties: [...(user.ownedProperties || []), savedProperty._id.toString()],
+    }
+
+    await replaceUserSession(event, {
+      user: updatedUser,
+      loggedInAt: currentSession.loggedInAt,
+    })
+
     await purgeAnalyticsCache(savedProperty._id.toString())
+
     return {
       success: true,
       message: `Property created successfully with ${floorCount} floors${billingResult ? ` and consolidated billing updated for ${billingResult.year}` : ''}`,
