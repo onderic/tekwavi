@@ -8,16 +8,23 @@
       'md:translate-x-0',
     ]"
   >
-    <div class="flex items-center justify-between py-4 h-16 px-0">
-      <div class="flex items-center">
-        <img
-          src="/logo.png"
-          alt="Amaam"
-          class="h-48 w-48 object-contain"
-        >
+    <div class="flex items-center justify-between py-4 px-4">
+      <div class="flex items-center space-x-3 min-w-0 flex-1">
+        <div class="flex-shrink-0">
+          <img
+            :src="selectedProperty?.logo ? `${$config.public.APP_URL}${selectedProperty.logo}` : '/logo.png'"
+            :alt="selectedProperty?.name || 'Amaam'"
+            class="h-10 w-10 rounded-lg object-cover  shadow-sm"
+          >
+        </div>
+        <div class="min-w-0 flex-1">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white truncate capitalize max-w-[150px]">
+            {{ selectedProperty?.name || 'Amaam Property' }}
+          </h2>
+        </div>
       </div>
 
-      <div class="flex-shrink-0">
+      <div class="flex-shrink-0 ml-2">
         <UButton
           variant="ghost"
           icon="i-lucide-x"
@@ -33,22 +40,29 @@
         v-if="(currentRole === 'developer' || currentRole === 'admin') && userProperties.length > 0"
         class="mb-4"
       >
-        <USelectMenu
-          v-model="selectedProperty"
-          :items="propertySelectItems"
-          :icon="'i-lucide-folder'"
-          size="sm"
-          class="w-full py-1"
-          searchable
-          placeholder="Select property"
-          @update:model-value="handlePropertySelection"
+        <UDropdownMenu
+          :items="propertyDropdownItems"
+          :content="{
+            align: 'start',
+            side: 'bottom',
+            sideOffset: 8,
+          }"
+          :ui="{
+            content: 'w-48',
+          }"
         >
-          <template #empty>
-            <div class="p-2 text-center text-sm text-gray-500 dark:text-white/70">
-              No properties available
-            </div>
-          </template>
-        </USelectMenu>
+          <UButton
+            variant="outline"
+            :icon="'i-lucide-folder'"
+            size="sm"
+            class="w-full justify-start"
+            trailing-icon="i-lucide-chevron-down"
+          >
+            <span class="truncate">
+              {{ selectedProperty?.name || 'Select property' }}
+            </span>
+          </UButton>
+        </UDropdownMenu>
       </div>
 
       <UNavigationMenu
@@ -121,51 +135,68 @@ const route = useRoute()
 
 const { logout } = useLogout()
 
-// Get user properties directly from user session
 const userProperties = computed(() => {
   return user.value?.properties || []
 })
 
-// Convert user properties to select menu items
-const propertySelectItems = computed(() => {
+const propertyItems = computed(() => {
   if (!userProperties.value.length) return []
 
   return userProperties.value.map(property => ({
-    id: property.id,
     label: property.name,
     description: property.address,
-    value: property.id,
+    icon: 'i-lucide-building',
+    onSelect: () => {
+      setCurrentProperty(property.id)
+      toast.add({
+        title: `Switched to ${property.name}`,
+        icon: 'i-lucide-building',
+        color: 'primary',
+      })
+      closeOnMobile()
+
+      // Navigate away from properties listing if we're there
+      if (route.path === '/properties/listing') {
+        router.push('/properties')
+      }
+    },
   }))
 })
 
-const selectedProperty = computed({
-  get: () => {
-    if (!propertyId.value) return undefined
-    return propertySelectItems.value.find(item => item.id === propertyId.value) || undefined
-  },
-  set: (value) => {
-    setCurrentProperty(value?.id || null)
-  },
+const propertyDropdownItems = computed(() => [
+  propertyItems.value,
+  [
+    {
+      label: 'View All Properties',
+      icon: 'i-lucide-eye',
+      onSelect: () => {
+        router.push('/properties/listing')
+        closeOnMobile()
+      },
+      disabled: false,
+      class: 'pointer-events-auto',
+      _nonSelectable: true,
+      _isActionButton: true,
+    },
+    {
+      label: 'New Property',
+      icon: 'i-lucide-plus',
+      onSelect: () => {
+        router.push('/properties/listing')
+        closeOnMobile()
+      },
+      disabled: false,
+      class: 'pointer-events-auto',
+      _nonSelectable: true,
+      _isActionButton: true,
+    },
+  ],
+])
+
+const selectedProperty = computed(() => {
+  if (!propertyId.value) return undefined
+  return userProperties.value.find(property => property.id === propertyId.value)
 })
-
-const handlePropertySelection = (selectedItem: any) => {
-  if (selectedItem && selectedItem.id) {
-    setCurrentProperty(selectedItem.id)
-
-    toast.add({
-      title: `Switched to ${selectedItem.label}`,
-      icon: 'i-lucide-building',
-      color: 'primary',
-    })
-
-    closeOnMobile()
-
-    // Navigate away from properties listing if we're there
-    if (route.path === '/properties/listing') {
-      router.push('/properties')
-    }
-  }
-}
 
 const closeOnMobile = () => {
   if (import.meta.client && window.innerWidth < 768) {
