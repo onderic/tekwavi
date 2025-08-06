@@ -530,17 +530,13 @@ function print(invoice?: any) {
     selectedInvoice.value = invoice
     isPrinting.value = true
 
-    // Wait for Vue to render the receipt card, then print
     nextTick(() => {
-      // Set a unique document title for the receipt
-      // Format: Receipt_InvoiceNumber_TenantName_Date
       const receiptDate = new Date(invoice.paymentDate).toISOString().split('T')[0]
       const tenantName = invoice.tenantName.replace(/\s+/g, '_')
       document.title = `Receipt_${invoice.invoiceNumber}_${tenantName}_${receiptDate}`
 
       window.print()
 
-      // Reset the printing state and document title after printing
       setTimeout(() => {
         isPrinting.value = false
         selectedInvoice.value = null
@@ -549,176 +545,14 @@ function print(invoice?: any) {
     })
   }
   else {
-    // For printing the table view, set a general title
     const originalTitle = document.title
     const currentDate = new Date().toISOString().split('T')[0]
     document.title = `Payment_Records_${currentProperty.value?.name || 'Property'}_${currentDate}`
 
     window.print()
-
-    // Restore original title
     setTimeout(() => {
       document.title = originalTitle
     }, 100)
   }
 }
 </script>
-
-<style>
-@media print {
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-  }
-
-   /* Flexbox layout for print */
-  .print\:min-h-screen {
-    min-height: 100vh !important;
-  }
-
-  .print\:flex {
-    display: flex !important;
-  }
-
-  .print\:flex-col {
-    flex-direction: column !important;
-  }
-
-  .print\:flex-grow {
-    flex-grow: 1 !important;
-  }
-
-  .print\:mt-auto {
-    margin-top: auto !important;
-  }
-
-  /* Compact spacing for print */
-  .print\:p-6 {
-    padding: 1.5rem !important;
-  }
-
-  .print\:p-3 {
-    padding: 0.75rem !important;
-  }
-
-  .print\:px-8 {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-  }
-
-  .print\:py-3 {
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.75rem !important;
-  }
-
-  .print\:py-2 {
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
-  }
-
-  .print\:px-3 {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-
-  .print\:mb-4 {
-    margin-bottom: 1rem !important;
-  }
-
-  .print\:mb-1 {
-    margin-bottom: 0.25rem !important;
-  }
-
-  .print\:mt-3 {
-    margin-top: 0.75rem !important;
-  }
-
-  .print\:mt-1 {
-    margin-top: 0.25rem !important;
-  }
-
-  .print\:gap-4 {
-    gap: 1rem !important;
-  }
-
-  .print\:gap-2 {
-    gap: 0.5rem !important;
-  }
-
-  /* Text size adjustments */
-  .print\:text-xl {
-    font-size: 1.25rem !important;
-  }
-
-  .print\:text-base {
-    font-size: 1rem !important;
-  }
-
-  .print\:text-sm {
-    font-size: 0.875rem !important;
-  }
-
-  .print\:text-xs {
-    font-size: 0.75rem !important;
-  }
-
-  .print\:text-\[10px\] {
-    font-size: 10px !important;
-  }
-
-  /* Logo size adjustment */
-  .print\:h-12 {
-    height: 3rem !important;
-  }
-
-  .print\:w-12 {
-    width: 3rem !important;
-  }
-
-  /* Ensure full width for print */
-  .print\:max-w-none {
-    max-width: none !important;
-  }
-
-  .print\:mx-0 {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  .print\:w-full {
-    width: 100% !important;
-  }
-
-  /* Hide elements not needed for print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Show receipt when printing */
-  .print\:block {
-    display: block !important;
-  }
-
-  /* Ensure colors print properly */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Fix table layout for print */
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
-
-  /* Ensure proper page breaks */
-  .page-break-avoid {
-    page-break-inside: avoid !important;
-  }
-}
-</style>
