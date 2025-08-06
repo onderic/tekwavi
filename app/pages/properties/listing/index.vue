@@ -125,10 +125,10 @@
             label: 'No properties found',
             description: 'Try adjusting your filters or search query.',
           }"
-          @select="(row: any) => {
+          @select="async (row: any) => {
             if (row.original) {
-              propertyStore.setCurrentProperty(row.original)
-              navigateTo('/properties')
+              setCurrentProperty(row.original._id.toString())
+              await navigateTo('/properties', { replace: true })
             }
           }"
         >
@@ -255,7 +255,7 @@ const categoryFilter = ref('all')
 const statusFilter = ref('all')
 const currentPage = ref(1)
 const perPage = ref(30)
-const propertyStore = usePropertyStore()
+const { setCurrentProperty } = useCurrentProperty()
 
 const categoryOptions = [
   { label: 'All Categories', value: 'all' },
