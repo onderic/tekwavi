@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { z } from 'zod'
+import type { FormSubmitEvent } from '#ui/types'
 
 const props = defineProps({
   loading: {
@@ -22,9 +23,8 @@ const form = ref({
   password: '',
 })
 
-const handleSubmit = async (event: Event) => {
-  event.preventDefault()
-  emit('login', form.value)
+const handleSubmit = async (event: FormSubmitEvent<any>) => {
+  emit('login', event.data)
 }
 </script>
 
