@@ -6,6 +6,7 @@ import { Floor } from '~~/server/models/Property/Floor'
 import { User } from '~~/server/models/User'
 import { createOrUpdateDeveloperBilling } from '~~/server/utils/billing'
 import { purgeAnalyticsCache } from '~~/server/utils/cacheUtils'
+import { handleLogoUpload } from '~~/server/utils/fileUpload'
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event)
@@ -28,8 +29,40 @@ export default defineEventHandler(async (event) => {
   session.startTransaction()
 
   try {
-    const body = await readBody(event)
-    const { floorCount, ...propertyData } = body
+    // Check if request is multipart (has file upload)
+    const contentType = getHeader(event, 'content-type') || ''
+    let propertyData
+    let logoUrl = null
+
+    if (contentType.includes('multipart/form-data')) {
+      // Handle file upload
+      const formData = await readMultipartFormData(event)
+
+      if (!formData) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'No form data provided',
+        })
+      }
+
+      // Use utility function to handle logo upload
+      const uploadResult = await handleLogoUpload(formData)
+      propertyData = uploadResult.data
+      logoUrl = uploadResult.logoUrl
+    }
+    else {
+      // Handle regular JSON body (no file upload)
+      propertyData = await readBody(event)
+    }
+
+    if (!propertyData) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Property data is required',
+      })
+    }
+
+    const { floorCount, ...restPropertyData } = propertyData
 
     if (floorCount === undefined || floorCount === null || floorCount < 0 || floorCount > 100) {
       throw createError({
@@ -39,7 +72,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const property = new Property({
-      ...propertyData,
+      ...restPropertyData,
+      logo: logoUrl,
       createdBy: user._id,
     })
 
@@ -92,8 +126,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    await purgeAnalyticsCache(savedProperty._id.toString()) // Purge cache after property creation
-
+    await purgeAnalyticsCache(savedProperty._id.toString())
     return {
       success: true,
       message: `Property created successfully with ${floorCount} floors${billingResult ? ` and consolidated billing updated for ${billingResult.year}` : ''}`,
@@ -102,6 +135,7 @@ export default defineEventHandler(async (event) => {
         propertyName: savedProperty.propertyName,
         categoryName: savedProperty.categoryName,
         address: savedProperty.address,
+        logo: savedProperty.logo,
         floors: savedFloors.map(floor => ({
           _id: floor._id,
           floorNumber: floor.floorNumber,
