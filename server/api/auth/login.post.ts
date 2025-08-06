@@ -1,64 +1,189 @@
 import type { User } from '#auth-utils'
 import { User as UserModel } from '~~/server/models/User'
-import { Property as PropertyModel } from '~~/server/models/Property'
 
 export default defineEventHandler(async (event) => {
   const { phone, password } = await readBody(event)
 
-  const dbUser = await UserModel.findOne({ phone }).select('+password')
+  const [dbUser] = await UserModel.aggregate([
+    {
+      $match: { phone },
+    },
+    {
+      $lookup: {
+        from: 'properties',
+        localField: 'ownedProperties',
+        foreignField: '_id',
+        as: 'ownedPropertiesData',
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              propertyName: 1,
+              categoryName: 1,
+              logo: 1,
+              address: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'properties',
+        localField: 'assignedProperty',
+        foreignField: '_id',
+        as: 'assignedPropertyData',
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              propertyName: 1,
+              categoryName: 1,
+              logo: 1,
+              address: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'units',
+        localField: 'ownedUnits',
+        foreignField: '_id',
+        as: 'ownedUnitsData',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'properties',
+              localField: 'propertyId',
+              foreignField: '_id',
+              as: 'property',
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    propertyName: 1,
+                    categoryName: 1,
+                    logo: 1,
+                    address: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $unwind: '$property',
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'units',
+        localField: 'rentedUnits',
+        foreignField: '_id',
+        as: 'rentedUnitsData',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'properties',
+              localField: 'propertyId',
+              foreignField: '_id',
+              as: 'property',
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    propertyName: 1,
+                    categoryName: 1,
+                    logo: 1,
+                    address: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $unwind: '$property',
+          },
+        ],
+      },
+    },
+  ])
 
   if (!dbUser) {
-    return createError({
+    console.log('❌ User not found')
+    throw createError({
       statusCode: 400,
       statusMessage: 'Please check your phone number and password.',
     })
   }
 
-  const mongoUser = JSON.parse(JSON.stringify(dbUser))
-
-  const user = {
-    ...mongoUser,
-    role: mongoUser.role,
-    address: mongoUser.address || undefined,
-    first_name: mongoUser.first_name || null,
-    last_name: mongoUser.last_name || null,
-    email: mongoUser.email || '',
-    phone: mongoUser.phone || undefined,
-    ownedProperties: mongoUser.ownedProperties || [],
-    ownedUnits: mongoUser.ownedUnits || [],
-    rentedUnits: mongoUser.rentedUnits || [],
-    assignedProperty: mongoUser.assignedProperty || null,
-    // Include temp password fields
-    tempPasswordExpiry: mongoUser.tempPasswordExpiry || null,
-    tempPasswordUsed: mongoUser.tempPasswordUsed || false,
-    tempPasswordVerifiedAt: mongoUser.tempPasswordVerifiedAt || null,
-    isVerified: mongoUser.isVerified || false,
-  } as User & { password?: string }
-
-  const isAuthenticated = await verifyPassword(user.password!, password)
+  const isAuthenticated = await verifyPassword(dbUser.password, password)
 
   if (!isAuthenticated) {
-    return createError({
+    console.log('❌ Password verification failed')
+    throw createError({
       statusCode: 400,
       statusMessage: 'Please check your phone number and password.',
     })
   }
 
-  delete user.password
+  // Extract properties based on user role
+  let properties: any[] = []
 
-  // If user is a developer, lookup corresponding properties
-  if (user.role === 'developer' && user.ownedProperties && user.ownedProperties.length > 0) {
-    const properties = await PropertyModel.find({
-      _id: { $in: user.ownedProperties },
+  if (dbUser.role === 'developer') {
+    properties = dbUser.ownedPropertiesData || []
+  }
+  else if (dbUser.role === 'caretaker') {
+    properties = dbUser.assignedPropertyData || []
+  }
+  else if (dbUser.role === 'unit_owner' || dbUser.role === 'tenant') {
+    const unitProperties = [
+      ...(dbUser.ownedUnitsData?.map((unit: any) => unit.property) || []),
+      ...(dbUser.rentedUnitsData?.map((unit: any) => unit.property) || []),
+    ]
+
+    const uniquePropertiesMap = new Map()
+    unitProperties.forEach((prop) => {
+      if (prop && prop._id) {
+        uniquePropertiesMap.set(prop._id.toString(), prop)
+      }
     })
-      .select('_id propertyName address')
-      .lean()
+    properties = Array.from(uniquePropertiesMap.values())
+  }
 
-    user.properties = properties.map(property => ({
-      id: property._id.toString(),
-      name: property.propertyName,
-      address: `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.postalCode}`,
-    }))
+  // Format properties
+  const formattedProperties = properties.map(property => ({
+    id: property._id.toString(),
+    name: property.propertyName,
+    logo: property.logo || null,
+    address: `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.postalCode}`,
+  }))
+
+  // Create user object matching the User type
+  const user: User = {
+    _id: dbUser._id.toString(),
+    first_name: dbUser.first_name || '',
+    last_name: dbUser.last_name || '',
+    email: dbUser.email || '',
+    role: dbUser.role,
+    phone: dbUser.phone || '',
+    createdAt: dbUser.createdAt,
+    updatedAt: dbUser.updatedAt,
+    lastLogin: dbUser.lastLogin,
+    isActive: dbUser.isActive,
+    isVerified: dbUser.isVerified,
+    address: dbUser.address,
+    ownedProperties: dbUser.ownedProperties || [],
+    ownedUnits: dbUser.ownedUnits || [],
+    rentedUnits: dbUser.rentedUnits || [],
+    assignedProperty: dbUser.assignedProperty || null,
+    tempPasswordExpiry: dbUser.tempPasswordExpiry || null,
+    tempPasswordUsed: dbUser.tempPasswordUsed || false,
+    tempPasswordVerifiedAt: dbUser.tempPasswordVerifiedAt || null,
+    properties: formattedProperties,
   }
 
   await UserModel.findByIdAndUpdate(user._id, {
@@ -70,5 +195,6 @@ export default defineEventHandler(async (event) => {
     loggedInAt: new Date(),
   })
 
+  // Return the session like your registration example
   return await getUserSession(event)
 })
