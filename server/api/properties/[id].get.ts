@@ -234,6 +234,7 @@ export default defineEventHandler(async (event) => {
           categoryName: 1,
           address: 1,
           description: 1,
+          logo: 1, // ← Add logo field here
           constructionCost: 1,
           floors: 1,
           stats: {
