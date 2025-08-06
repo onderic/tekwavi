@@ -14,16 +14,17 @@ declare module '#auth-utils' {
       city?: string | null
       state?: string | null
     }
+
     ownedProperties?: string[]
     ownedUnits?: string[]
     rentedUnits?: string[]
     assignedProperty?: string | null
 
-    // Developer properties (populated for developer role)
     properties?: {
       id: string
       name: string
       address: string
+      logo?: string | null
     }[]
 
     // Password reset fields
