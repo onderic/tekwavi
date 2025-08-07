@@ -256,6 +256,7 @@
         </div>
         <UnitsPaymentHistory
           :payments="payments"
+          :tenant="tenant"
           @refresh="refresh()"
         />
 
@@ -330,7 +331,7 @@ const { data: unitInfo, status, refresh } = useAsyncData(
     const unitData = await $fetch(`/api/properties/${unitId.value}/unit`, {})
 
     const occupationData = await $fetch(`/api/tenants/${unitId.value}/occupation`, {})
-    const paymentData = await $fetch(`/api/invoices/unit`, {
+    const paymentData = await $fetch<any>(`/api/invoices/unit`, {
       query: {
         unitId: unitId.value,
         year: selectedPaymentYear.value,
