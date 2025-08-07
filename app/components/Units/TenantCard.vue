@@ -36,7 +36,7 @@
           size="xl"
           :text="getTenantInitials(tenant?.firstName, tenant?.lastName)"
           class="mb-2"
-          :class="tenant.rentalType === 'monthly' ? 'bg-secondary' : tenant.rentalType === 'owner_occupied' ? 'bg-success' : 'bg-tertiary'"
+          :class="tenant.rentalType === 'monthly' ? 'bg-secondary' : tenant.rentalType === 'owner_occupied' ? 'bg-success' : 'bg-primary'"
           :ui="{ fallback: 'font-medium leading-none text-white truncate' }"
         />
         <h3 class="text-lg font-medium ">
@@ -52,7 +52,7 @@
 
         <div class="mt-2 flex flex-col items-center">
           <UBadge
-            :color="tenant.rentalType === 'monthly' ? 'secondary' : tenant.rentalType === 'owner_occupied' ? 'success' : 'tertiary'"
+            :color="tenant.rentalType === 'monthly' ? 'secondary' : tenant.rentalType === 'owner_occupied' ? 'success' : 'primary'"
             class="capitalize mb-1"
             variant="solid"
           >
