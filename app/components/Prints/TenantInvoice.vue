@@ -125,10 +125,10 @@
                   :key="service.serviceId"
                   class="border-b border-gray-200 hover:bg-gray-50"
                 >
-                  <td class="py-3 px-4 print:py-2 print:px-3 print:text-sm">
+                  <td class="py-3 px-4 print:py-2 print:px-3 print:text-sm capitalize">
                     {{ service.serviceName }}
                   </td>
-                  <td class="py-3 px-4 text-center print:py-2 print:px-3 print:text-sm">
+                  <td class="py-3 px-4 text-center print:py-2 print:px-3 print:text-sm capitalize">
                     {{ invoice.paymentFor.monthName }} {{ invoice.paymentFor.year }}
                   </td>
                   <td class="py-3 px-4 text-right print:py-2 print:px-3 print:text-sm">
@@ -272,10 +272,8 @@
 </template>
 
 <script setup lang="ts">
-import type { InvoiceListItem } from '~/types/invoice'
-
 interface Props {
-  invoice: InvoiceListItem
+  invoice: any
 
   tenantInfo?: {
     email?: string
@@ -326,7 +324,7 @@ const nextDueDate = computed(() => {
 })
 </script>
 
-<style scoped>
+<style>
 @media print {
   @page {
     size: A4;
@@ -338,9 +336,17 @@ const nextDueDate = computed(() => {
     padding: 0;
   }
 
+  /* Force single page layout */
+  html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
   /* Flexbox layout for print */
   .print\:min-h-screen {
     min-height: 100vh !important;
+    max-height: 100vh !important;
   }
 
   .print\:flex {
@@ -478,9 +484,29 @@ const nextDueDate = computed(() => {
     border-collapse: collapse !important;
   }
 
-  /* Ensure proper page breaks */
-  .page-break-avoid {
+  /* Force single page - no page breaks */
+  * {
     page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    break-inside: avoid !important;
+    break-after: avoid !important;
+    break-before: avoid !important;
   }
+
+  /* Specific container rules to fit on one page */
+  .print\:min-h-screen.print\:flex.print\:flex-col {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Main wrapper should fit exactly one page */
+  .print\:min-h-screen > .print\:flex {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    padding-bottom: 0.5rem !important; /* Add padding to container instead */
+  }
+
 }
 </style>
