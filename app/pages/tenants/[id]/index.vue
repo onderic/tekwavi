@@ -241,7 +241,7 @@
         </div>
       </template>
     </UModal>
-    <ClientOnly>
+  
       <Maintenance
         v-if="showAddModal"
         :open="showAddModal"
@@ -252,7 +252,7 @@
         @update:open="showAddModal = $event"
         @submit="handleMaintenanceSubmit"
       />
-    </ClientOnly>
+  
   </BasePage>
 </template>
 
