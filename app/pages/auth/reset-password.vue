@@ -53,10 +53,8 @@ const handleResetPassword = async (form: { newPassword: string }) => {
 </script>
 
 <template>
-  <ClientOnly>
-    <AuthResetPassword
-      :loading="isLoading"
-      @reset-password="handleResetPassword"
-    />
-  </ClientOnly>
+  <AuthResetPassword
+    :loading="isLoading"
+    @reset-password="handleResetPassword"
+  />
 </template>
