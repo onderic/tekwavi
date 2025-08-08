@@ -24,11 +24,13 @@ export async function purgeAnalyticsCache(propertyId: string) {
 
     if (analyticsKeys.length > 0) {
       await Promise.all(analyticsKeys.map(k => cache.removeItem(k)))
+      console.log(`✅ Purged ${analyticsKeys.length} analytics cache entries for property ${propertyId}`)
     }
 
     return { removed: analyticsKeys }
   }
   catch (error) {
+    console.error('❌ Error purging analytics cache:', error)
     return { removed: [], error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
