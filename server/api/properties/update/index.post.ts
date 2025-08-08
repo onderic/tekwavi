@@ -134,8 +134,8 @@ export default defineEventHandler(async (event) => {
     Object.assign(existingProperty, updateData)
     const updatedProperty = await existingProperty.save()
 
-    // Purge analytics cache
-    await purgeAnalyticsCache(updatedProperty._id.toString())
+    const result = await purgeAnalyticsCache(updatedProperty._id.toString())
+    console.log(`🧹 Cache purge result:`, result)
 
     return {
       success: true,
