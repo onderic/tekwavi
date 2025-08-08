@@ -106,17 +106,16 @@
     </UCard>
 
     <!-- Add/Edit Service Modal -->
-    <ClientOnly>
-      <Services
-        :open="showAddModal || showEditModal"
-        :loading="submitting"
-        :property-id="propertyId || ''"
-        :total-units="totalUnits"
-        :service="editingService"
-        @update:open="handleModalClose"
-        @submit="handleServiceSubmit"
-      />
-    </ClientOnly>
+
+    <Services
+      :open="showAddModal || showEditModal"
+      :loading="submitting"
+      :property-id="propertyId || ''"
+      :total-units="totalUnits"
+      :service="editingService"
+      @update:open="handleModalClose"
+      @submit="handleServiceSubmit"
+    />
 
     <!-- Delete Confirmation Modal -->
     <UModal
