@@ -49,12 +49,18 @@ const rentalTypeOptions = ref<RadioGroupItem[]>([
 
 const getLeaseStartDate = () => {
   const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}-01`
 }
 
 const getLeaseEndDate = () => {
   const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  const monthStr = String(month + 1).padStart(2, '0')
+  return `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`
 }
 
 const schema = z.object({
