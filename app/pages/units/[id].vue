@@ -83,20 +83,18 @@
             @save="refresh()"
           />
 
-          <ClientOnly>
-            <UnitsPaymentCalendar
-              :unit="unit"
-              :tenant="tenant"
-              :payments="payments"
-              :selected-year="selectedPaymentYear"
-              :available-years="availableYears"
-              :property-id="propertyId"
-              :unit-services="unitServices"
-              :expected-total-amount="getExpectedtotalAmount()"
-              @update:selected-year="selectedPaymentYear = $event"
-              @save="refresh()"
-            />
-          </ClientOnly>
+          <UnitsPaymentCalendar
+            :unit="unit"
+            :tenant="tenant"
+            :payments="payments"
+            :selected-year="selectedPaymentYear"
+            :available-years="availableYears"
+            :property-id="propertyId"
+            :unit-services="unitServices"
+            :expected-total-amount="getExpectedtotalAmount()"
+            @update:selected-year="selectedPaymentYear = $event"
+            @save="refresh()"
+          />
 
           <UnitsTenantCard
             ref="tenantCardRef"
@@ -263,22 +261,19 @@
         <UnitsOccupationHistory :occupation-history="unitInfo?.occupationHistory?.occupants || []" />
 
         <!-- Ownership Modal -->
-        <ClientOnly>
-          <UnitsOwnershipModal
-            v-model:is-open="showOwnershipModal"
-            :ownership="ownership"
-          />
-        </ClientOnly>
 
-        <ClientOnly>
-          <PropertyAddTenant
-            v-model:open="showAddTenantModal"
-            :unit="unit"
-            :property-id="propertyId"
-            :ownership="ownership"
-            @save="refresh()"
-          />
-        </ClientOnly>
+        <UnitsOwnershipModal
+          v-model:is-open="showOwnershipModal"
+          :ownership="ownership"
+        />
+
+        <PropertyAddTenant
+          v-model:open="showAddTenantModal"
+          :unit="unit"
+          :property-id="propertyId"
+          :ownership="ownership"
+          @save="refresh()"
+        />
       </template>
     </UCard>
   </BasePage>
