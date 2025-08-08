@@ -303,7 +303,7 @@
       </UCard>
     </UModal>
 
-    <ClientOnly>
+  
       <UsersAddOwner
         :open="showOwnerModal"
         :loading="isLoading"
@@ -311,7 +311,7 @@
         @save="handleAddOwner"
         @update:open="showOwnerModal = $event"
       />
-    </ClientOnly>
+  
   </BasePage>
 </template>
 
