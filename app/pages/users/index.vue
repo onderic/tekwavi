@@ -188,14 +188,14 @@ const handleInvite = async (form: InviteForm) => {
           </div>
         </div>
 
-        <ClientOnly>
+      
           <UsersInvite
             v-if="showInviteModal"
             v-model:open="showInviteModal"
             :loading="isLoading"
             @invite="handleInvite"
           />
-        </ClientOnly>
+      
 
         <UTable
           ref="table"
