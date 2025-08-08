@@ -18,9 +18,7 @@ const schema = z
       .refine(val => val.trim().length > 0, 'Phone number is required'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
-    first_name: z.string().min(1, 'First name is required'),
-    last_name: z.string().min(1, 'Last name is required'),
-    email: z.string().email('Invalid email address').optional(),
+    email: z.string().email('Invalid email address').optional().or(z.literal('')),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords don\'t match',
@@ -39,9 +37,8 @@ const form = ref({
 const handleSubmit = async (event: FormSubmitEvent<any>) => {
   const { confirmPassword, ...registerData } = event.data
 
-  // Generate email if not provided
-  if (!registerData.email) {
-    registerData.email = `user${registerData.phone}@homeae.local`
+  if (!registerData.email || registerData.email.trim() === '') {
+    delete registerData.email
   }
 
   emit('register', registerData)
@@ -61,34 +58,6 @@ const handleSubmit = async (event: FormSubmitEvent<any>) => {
         class="space-y-4"
         @submit="handleSubmit"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UFormField
-            label="First Name"
-            name="first_name"
-            required
-          >
-            <UInput
-              v-model="form.first_name"
-              :disabled="loading"
-              autocomplete="given-name"
-              placeholder="John"
-            />
-          </UFormField>
-
-          <UFormField
-            label="Last Name"
-            name="last_name"
-            required
-          >
-            <UInput
-              v-model="form.last_name"
-              :disabled="loading"
-              autocomplete="family-name"
-              placeholder="Doe"
-            />
-          </UFormField>
-        </div>
-
         <UFormField
           label="Phone Number"
           name="phone"
@@ -100,9 +69,6 @@ const handleSubmit = async (event: FormSubmitEvent<any>) => {
             autocomplete="tel"
             placeholder="e.g. 0712345678"
           />
-          <template #hint>
-            <span class="text-xs text-gray-500">Enter your 10-digit phone number</span>
-          </template>
         </UFormField>
 
         <UFormField
@@ -116,9 +82,6 @@ const handleSubmit = async (event: FormSubmitEvent<any>) => {
             autocomplete="email"
             placeholder="john@example.com"
           />
-          <template #hint>
-            <span class="text-xs text-gray-500">Leave blank to auto-generate</span>
-          </template>
         </UFormField>
 
         <UFormField
