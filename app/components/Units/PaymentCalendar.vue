@@ -311,14 +311,14 @@
             >
               Close
             </UButton>
-            <UButton
+            <!-- <UButton
               color="primary"
               variant="solid"
               icon="i-lucide-printer"
               @click="print(selectedPayment)"
             >
               Print Receipt
-            </UButton>
+            </UButton> -->
           </div>
         </div>
       </template>
@@ -452,9 +452,9 @@ interface Props {
   expectedTotalAmount: number
 }
 
-const showPrintInvoice = ref(false)
 const props = defineProps<Props>()
-const printInvoiceData = ref<any | null>(null)
+// const showPrintInvoice = ref(false)
+// const printInvoiceData = ref<any | null>(null)
 
 defineEmits<{
   'update:selectedYear': [year: number]
@@ -935,46 +935,46 @@ function showMonthPaymentDetails(month: any) {
   }
 }
 
-function print(invoice?: any) {
-  if (invoice) {
-    const transformedInvoice = {
-      invoiceNumber: invoice.invoiceNumber,
-      unitNumber: invoice.unitNumber,
-      serviceCharges: invoice.serviceCharges || [],
-      totalServiceCharges: invoice.totalServiceCharges || 0,
-      tenantName: invoice.tenantName,
-      amount: invoice.amount,
-      totalAmount: invoice.totalAmount,
-      paymentMethod: formatPaymentMethod(invoice.paymentMethod),
-      paymentReferenceId: invoice.paymentReferenceId || 'N/A',
-      phoneNumber: invoice.phoneNumber || 'N/A',
-      paymentDate: invoice.paymentDate,
-      dueDate: invoice.dueDate,
-      paymentFor: {
-        month: invoice.paymentFor.month,
-        monthName: invoice.paymentFor.monthName,
-        year: invoice.paymentFor.year,
-      },
-      recordedBy: invoice.recordedBy || 'System',
-      status: invoice.status,
-      createdAt: invoice.createdAt,
-      propertyDetails: {
-        propertyName: invoice.propertyName,
-        address: invoice.propertyAddress || 'N/A',
-        unitType: 'Apartment',
-      },
-    }
+// function print(invoice?: any) {
+//   if (invoice) {
+//     const transformedInvoice = {
+//       invoiceNumber: invoice.invoiceNumber,
+//       unitNumber: invoice.unitNumber,
+//       serviceCharges: invoice.serviceCharges || [],
+//       totalServiceCharges: invoice.totalServiceCharges || 0,
+//       tenantName: invoice.tenantName,
+//       amount: invoice.amount,
+//       totalAmount: invoice.totalAmount,
+//       paymentMethod: formatPaymentMethod(invoice.paymentMethod),
+//       paymentReferenceId: invoice.paymentReferenceId || 'N/A',
+//       phoneNumber: invoice.phoneNumber || 'N/A',
+//       paymentDate: invoice.paymentDate,
+//       dueDate: invoice.dueDate,
+//       paymentFor: {
+//         month: invoice.paymentFor.month,
+//         monthName: invoice.paymentFor.monthName,
+//         year: invoice.paymentFor.year,
+//       },
+//       recordedBy: invoice.recordedBy || 'System',
+//       status: invoice.status,
+//       createdAt: invoice.createdAt,
+//       propertyDetails: {
+//         propertyName: invoice.propertyName,
+//         address: invoice.propertyAddress || 'N/A',
+//         unitType: 'Apartment',
+//       },
+//     }
 
-    printInvoiceData.value = transformedInvoice
-    showPrintInvoice.value = true
+//     printInvoiceData.value = transformedInvoice
+//     showPrintInvoice.value = true
 
-    setTimeout(() => {
-      window.print()
-    }, 100)
-  }
-  else {
-    // If no invoice is passed, just print the page
-    window.print()
-  }
-}
+//     setTimeout(() => {
+//       window.print()
+//     }, 100)
+//   }
+//   else {
+//     // If no invoice is passed, just print the page
+//     window.print()
+//   }
+// }
 </script>
