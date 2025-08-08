@@ -588,18 +588,21 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
       const totalEstimatedCost = constructionCost.totalEstimatedCost || 0
       const actualCostIncurred = constructionCost.actualCostIncurred || 0
 
+      // Use totalEstimatedCost as the main construction cost
+      const mainConstructionCost = totalEstimatedCost
+
       // Calculate net profit/loss
-      const totalCosts = actualCostIncurred + totalExpenses
+      const totalCosts = mainConstructionCost + totalExpenses
       const netProfit = grossRevenue - totalCosts
 
       // Calculate ROI if we have construction cost
       let roi = '0.0'
-      if (actualCostIncurred > 0) {
-        const roiValue = ((grossRevenue - totalCosts) / actualCostIncurred) * 100
+      if (mainConstructionCost > 0) {
+        const roiValue = ((grossRevenue - totalCosts) / mainConstructionCost) * 100
         roi = roiValue.toFixed(1)
       }
 
-      // Calculate budget variance
+      // Calculate budget variance (compare actual vs estimated)
       let budgetVariance = null
       let budgetVarianceStatus = 'on_track'
       if (totalEstimatedCost > 0) {
@@ -609,6 +612,7 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
       }
 
       constructionCostData = {
+        mainConstructionCost, // This will be totalEstimatedCost
         actualCostIncurred,
         budgetVariance,
         budgetVarianceStatus,
@@ -653,7 +657,7 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
     const comprehensiveNetProfit = totalAllRevenue - totalAllExpenses - ownerDisbursements // Subtract owner disbursements as they are money out
 
     // Calculate capital recovery metrics
-    const constructionCost = (property as any).constructionCost?.actualCostIncurred || 0
+    const constructionCost = (property as any).constructionCost?.totalEstimatedCost || 0 // Changed from actualCostIncurred
     // Capital recovery should be based on net profit, not just revenue
     const capitalRecovered = constructionCost > 0 ? Math.max(0, comprehensiveNetProfit) : 0
     const capitalRecoveryRate = constructionCost > 0
@@ -762,6 +766,7 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
 
         // Construction cost data
         actualCostIncurred: constructionCostData?.actualCostIncurred || 0,
+        totalEstimatedCost: constructionCostData?.mainConstructionCost || 0,
         budgetVariance: constructionCostData?.budgetVariance || null,
         budgetVarianceStatus: constructionCostData?.budgetVarianceStatus || 'on_track',
         netProfit: constructionCostData?.netProfit || comprehensiveNetProfit,
@@ -791,7 +796,7 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
   }
 },
 {
-  maxAge: 21 * 24 * 60 * 60,
+  maxAge: 7 * 24 * 60 * 60,
   swr: true,
   name: 'analytics',
   getKey: (event: H3Event) => {
