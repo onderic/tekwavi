@@ -23,7 +23,9 @@ const handleRequestReset = async (form: { phone: string }) => {
       title: 'Temporary Password Sent',
       description: `A temporary password has been sent to ${form.phone}`,
     })
-    navigateTo(`/auth/confirm-temp-password?phone=${encodeURIComponent(form.phone)}`, { replace: true })
+    sessionStorage.setItem('temp-password-phone', form.phone)
+
+    navigateTo('/auth/confirm-temp-password', { replace: true })
   }
   catch (error) {
     if (error && typeof error === 'object' && 'statusMessage' in error) {
@@ -49,10 +51,8 @@ const handleRequestReset = async (form: { phone: string }) => {
 </script>
 
 <template>
-  <ClientOnly>
-    <AuthRequestResetPassword
-      :loading="isLoading"
-      @request-reset="handleRequestReset"
-    />
-  </ClientOnly>
+  <AuthRequestResetPassword
+    :loading="isLoading"
+    @request-reset="handleRequestReset"
+  />
 </template>
