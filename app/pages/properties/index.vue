@@ -312,25 +312,22 @@
       @refresh="refresh"
     />
 
-    <ClientOnly>
-      <PropertyFloor
-        v-model:open="showFloor"
-        :property-id="String(propertyId)"
-        :floor-number="data?.stats?.totalFloors || 0"
-        :rent-amount="data?.property?.floors?.[0]?.units?.[0]?.rentAmount || 0"
-        @refresh="refresh"
-      />
-    </ClientOnly>
-    <ClientOnly>
-      <PropertyEdit
-        v-if="data?.property"
-        v-model:open="editProperty"
-        :property="data?.property"
-        :loading="status === 'pending'"
-        @update:open="editProperty = $event"
-        @save="refresh"
-      />
-    </ClientOnly>
+    <PropertyFloor
+      v-model:open="showFloor"
+      :property-id="String(propertyId)"
+      :floor-number="data?.stats?.totalFloors || 0"
+      :rent-amount="data?.property?.floors?.[0]?.units?.[0]?.rentAmount || 0"
+      @refresh="refresh"
+    />
+
+    <PropertyEdit
+      v-if="data?.property"
+      v-model:open="editProperty"
+      :property="data?.property"
+      :loading="status === 'pending'"
+      @update:open="editProperty = $event"
+      @save="refresh"
+    />
   </BasePage>
 </template>
 
