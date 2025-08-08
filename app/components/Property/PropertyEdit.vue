@@ -10,7 +10,7 @@
       <UForm
         :schema="schema"
         :state="form"
-        class="space-y-6"
+        class="space-y-6 max-w-7xl mx-auto"
         @submit="handleSubmit"
       >
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
