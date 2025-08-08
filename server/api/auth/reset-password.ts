@@ -72,7 +72,114 @@ export default defineEventHandler(async (event) => {
     lastLogin: new Date(),
   })
 
-  const updatedDbUser = await UserModel.findById(dbUser._id).select('+password')
+  // Use aggregation to get user with populated properties data
+  const [updatedDbUser] = await UserModel.aggregate([
+    {
+      $match: { _id: dbUser._id },
+    },
+    {
+      $lookup: {
+        from: 'properties',
+        localField: 'ownedProperties',
+        foreignField: '_id',
+        as: 'ownedPropertiesData',
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              propertyName: 1,
+              categoryName: 1,
+              logo: 1,
+              address: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'properties',
+        localField: 'assignedProperty',
+        foreignField: '_id',
+        as: 'assignedPropertyData',
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              propertyName: 1,
+              categoryName: 1,
+              logo: 1,
+              address: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'units',
+        localField: 'ownedUnits',
+        foreignField: '_id',
+        as: 'ownedUnitsData',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'properties',
+              localField: 'propertyId',
+              foreignField: '_id',
+              as: 'property',
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    propertyName: 1,
+                    categoryName: 1,
+                    logo: 1,
+                    address: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $unwind: '$property',
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: 'units',
+        localField: 'rentedUnits',
+        foreignField: '_id',
+        as: 'rentedUnitsData',
+        pipeline: [
+          {
+            $lookup: {
+              from: 'properties',
+              localField: 'propertyId',
+              foreignField: '_id',
+              as: 'property',
+              pipeline: [
+                {
+                  $project: {
+                    _id: 1,
+                    propertyName: 1,
+                    categoryName: 1,
+                    logo: 1,
+                    address: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $unwind: '$property',
+          },
+        ],
+      },
+    },
+  ])
 
   if (!updatedDbUser) {
     return createError({
@@ -81,42 +188,59 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const mongoUser = JSON.parse(JSON.stringify(updatedDbUser))
+  let properties: any[] = []
 
-  interface Unit {
-    unitId: string
-    unitNumber: string
-    floorId: string
-    floorNumber: number
-    associatedAt: Date
-    isPrimary: boolean
-    tenantId: string
-    password?: string
-    _id?: string
+  if (updatedDbUser.role === 'developer') {
+    properties = updatedDbUser.ownedPropertiesData || []
+  }
+  else if (updatedDbUser.role === 'caretaker') {
+    properties = updatedDbUser.assignedPropertyData || []
+  }
+  else if (updatedDbUser.role === 'unit_owner' || updatedDbUser.role === 'tenant') {
+    const unitProperties = [
+      ...(updatedDbUser.ownedUnitsData?.map((unit: any) => unit.property) || []),
+      ...(updatedDbUser.rentedUnitsData?.map((unit: any) => unit.property) || []),
+    ]
+
+    const uniquePropertiesMap = new Map()
+    unitProperties.forEach((prop) => {
+      if (prop && prop._id) {
+        uniquePropertiesMap.set(prop._id.toString(), prop)
+      }
+    })
+    properties = Array.from(uniquePropertiesMap.values())
   }
 
-  interface Property {
-    propertyId: string
-    name: string
-    role: 'developer' | 'caretaker' | 'tenant' | 'normal'
-    associatedAt?: Date
-    units?: Unit[]
-    _id?: string
+  const formattedProperties = properties.map(property => ({
+    id: property._id.toString(),
+    name: property.propertyName,
+    logo: property.logo || null,
+    address: `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.postalCode}`,
+  }))
+
+  const user: User = {
+    _id: updatedDbUser._id.toString(),
+    first_name: updatedDbUser.first_name || '',
+    last_name: updatedDbUser.last_name || '',
+    email: updatedDbUser.email || '',
+    role: updatedDbUser.role,
+    phone: updatedDbUser.phone || '',
+    createdAt: updatedDbUser.createdAt,
+    updatedAt: updatedDbUser.updatedAt,
+    lastLogin: updatedDbUser.lastLogin,
+    isActive: updatedDbUser.isActive,
+    isVerified: updatedDbUser.isVerified,
+    address: updatedDbUser.address,
+    ownedProperties: updatedDbUser.ownedProperties || [],
+    ownedUnits: updatedDbUser.ownedUnits || [],
+    rentedUnits: updatedDbUser.rentedUnits || [],
+    assignedProperty: updatedDbUser.assignedProperty || null,
+    tempPasswordExpiry: updatedDbUser.tempPasswordExpiry || null,
+    tempPasswordUsed: updatedDbUser.tempPasswordUsed || false,
+    tempPasswordVerifiedAt: updatedDbUser.tempPasswordVerifiedAt || null,
+    properties: formattedProperties,
   }
 
-  const user = {
-    ...mongoUser,
-    properties: (mongoUser.properties || []) as Property[],
-    address: mongoUser.address || undefined,
-    first_name: mongoUser.first_name || null,
-    last_name: mongoUser.last_name || null,
-    email: mongoUser.email || '',
-    phone: mongoUser.phone || undefined,
-  } as User & { password?: string, properties: Property[] }
-
-  delete user.password
-
-  // Clear any existing session and create new user session
   await clearUserSession(event)
 
   await setUserSession(event, {
