@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
 
     const savedService = await service.save({ session })
 
-    if (savedService.isActive && savedService.monthlyCost > 0) {
+    if (savedService.isActive && savedService.monthlyCost && savedService.monthlyCost > 0) {
       const currentDate = new Date()
       const expenseDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
 
