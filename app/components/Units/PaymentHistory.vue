@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UCard class="mb-8">
+    <UCard class="mb-8 print:hidden">
       <template #header>
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold">
@@ -165,6 +165,9 @@ const isInvalidating = ref(false)
 const isPrinting = ref(false)
 const selectedPrintInvoice = ref<any>(null)
 
+// Add this line to declare originalTitle
+let originalTitle = ''
+
 // Computed tenant info
 const tenantInfo = computed(() => ({
   email: props.tenant?.email || 'N/A',
@@ -244,43 +247,44 @@ const paymentColumns: TableColumn<Invoice>[] = [
   },
 ]
 
-function handleReadyToPrint() {
-  setTimeout(() => {
-    window.print()
-
-    setTimeout(() => {
-      isPrinting.value = false
-      selectedPrintInvoice.value = null
-      document.title = originalTitle
-    }, 100)
-  }, 100) // buffer in case of font/image loading
-}
-
-let originalTitle = ''
-
 function print(invoice?: any) {
   if (invoice) {
     originalTitle = document.title
+    const receiptDate = new Date(invoice.paymentDate).toISOString().split('T')[0]
+    const tenantName = invoice.tenantName.replace(/\s+/g, '_')
+    document.title = `Receipt_${invoice.invoiceNumber}_${tenantName}_${receiptDate}`
+
     selectedPrintInvoice.value = invoice
     isPrinting.value = true
 
-    nextTick(() => {
-      const receiptDate = new Date(invoice.paymentDate).toISOString().split('T')[0]
-      const tenantName = invoice.tenantName.replace(/\s+/g, '_')
-      document.title = `Receipt_${invoice.invoiceNumber}_${tenantName}_${receiptDate}`
-    })
+    // Wait for component to render, then print directly
+    setTimeout(() => {
+      window.print()
 
-    // We DO NOT call window.print() here anymore — wait for child to emit
+      // Reset after print dialog
+      setTimeout(() => {
+        isPrinting.value = false
+        selectedPrintInvoice.value = null
+        document.title = originalTitle
+      }, 1000)
+    }, 500)
   }
   else {
-    // Bulk/record printing — no child involved
+    // Bulk printing
+    originalTitle = document.title
     const currentDate = new Date().toISOString().split('T')[0]
     document.title = `Payment_Records_${currentProperty.value?.name || 'Property'}_${currentDate}`
 
     window.print()
     setTimeout(() => {
       document.title = originalTitle
-    }, 200)
+    }, 500)
   }
+}
+
+// Simplified - remove the complex ready-to-print logic
+function handleReadyToPrint() {
+  // Component is ready, but we're handling print in the main function
+  console.log('Print component is ready')
 }
 </script>
