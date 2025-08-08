@@ -537,6 +537,7 @@ interface AnalyticsData {
   expensesTrend?: 'up' | 'down'
 
   // Construction cost properties
+  totalEstimatedCost?: number
   actualCostIncurred?: number
   budgetVariance?: string
   budgetVarianceStatus?: 'over' | 'under' | 'on_track'
@@ -708,7 +709,7 @@ export default {
 
     // Construction cost computed properties
     constructionCost() {
-      return this.analytics?.actualCostIncurred || 0
+      return this.analytics?.totalEstimatedCost || 0
     },
 
     budgetVariance() {
