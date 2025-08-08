@@ -285,13 +285,6 @@
         </div>
       </template>
     </div>
-    <div class="hidden print:block">
-      <UnitsPaymentHistory
-        v-if="unit"
-        :payments="payments"
-        :tenant="tenant"
-      />
-    </div>
   </BasePage>
 </template>
 

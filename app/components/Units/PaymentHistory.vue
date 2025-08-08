@@ -1,6 +1,6 @@
 <template>
   <div>
-    <UCard class="mb-8 print:hidden">
+    <UCard class="mb-4 print:hidden">
       <template #header>
         <div class="flex justify-between items-center">
           <h2 class="text-lg font-bold">
