@@ -218,12 +218,10 @@
       </UCard>
     </div>
 
-    <ClientOnly>
-      <PropertyAdd
-        v-model:is-open="showAddModal"
-        @property:added="refresh"
-      />
-    </ClientOnly>
+    <PropertyAdd
+      v-model:is-open="showAddModal"
+      @property:added="refresh"
+    />
   </BasePage>
 </template>
 
