@@ -11,7 +11,7 @@
         <UForm
           :schema="schema"
           :state="state"
-          class="space-y-6"
+          class="space-y-6 max-w-7xl mx-auto"
           @submit="addProperty"
         >
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
