@@ -35,7 +35,7 @@
                 <img
                   :src="currentProperty?.logo ? `${$config.public.APP_URL}${currentProperty.logo}` : '/logo.png'"
                   :alt="currentProperty?.name || 'Amaam'"
-                  class="h-8 w-8 rounded-lg object-cover  shadow-sm"
+                  class="h-16 w-16 rounded-lg object-cover  shadow-none"
                 >
               </div>
               <div class="ml-4 print:ml-3">
