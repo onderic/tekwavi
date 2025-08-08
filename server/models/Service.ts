@@ -13,29 +13,29 @@ const serviceSchema = new Schema({
   },
   serviceType: {
     type: String,
-    required: true,
+    required: false,
     uppercase: true,
   },
   // Cost information
   monthlyCost: {
     type: Number,
-    required: true,
+    required: false,
     min: 0,
   },
   costPerUnit: {
     type: Number,
-    required: true,
+    required: false,
     min: 0,
   },
 
   // Service provider information
   serviceProvider: {
     type: String,
-    required: true,
+    required: false,
   },
   providerContact: {
     type: String,
-    required: true,
+    required: false,
   },
   contractDetails: {
     type: String,
@@ -45,11 +45,11 @@ const serviceSchema = new Schema({
   propertyId: {
     type: Schema.Types.ObjectId,
     ref: 'Property',
-    required: true,
+    required: false,
   },
   propertyName: {
     type: String,
-    required: true,
+    required: false,
   },
 
   // Service status and configuration
@@ -71,11 +71,11 @@ const serviceSchema = new Schema({
   createdBy: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: false,
   },
   createdByName: {
     type: String,
-    required: true,
+    required: false,
   },
   createdDate: {
     type: Date,
@@ -144,28 +144,6 @@ const serviceSchema = new Schema({
 }, {
   timestamps: true,
   versionKey: false,
-})
-
-serviceSchema.index({ propertyId: 1, isActive: 1 })
-serviceSchema.index({ serviceType: 1, isActive: 1 })
-serviceSchema.index({ serviceProvider: 1 })
-
-// Pre-save hook to generate serviceId
-serviceSchema.pre('save', async function (next) {
-  if (this.isNew && !this.serviceId) {
-    const count = await Service.countDocuments()
-    this.serviceId = `SRV-${String(count + 1).padStart(6, '0')}`
-  }
-  next()
-})
-
-// Pre-update hook to track modifications
-serviceSchema.pre('findOneAndUpdate', function (next) {
-  const update = this.getUpdate() as any
-  if (update.$set) {
-    update.$set.lastModifiedDate = new Date()
-  }
-  next()
 })
 
 export const Service = model('Service', serviceSchema)
