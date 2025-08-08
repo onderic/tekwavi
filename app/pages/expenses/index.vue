@@ -139,7 +139,7 @@
       </div>
     </UCard>
 
-    <ClientOnly>
+  
       <ExpensesAdd
         v-if="showExpenseModal"
         v-model:open="showExpenseModal"
@@ -147,7 +147,7 @@
         :loading="isLoading"
         @save="handleSubmit"
       />
-    </ClientOnly>
+  
   </BasePage>
 </template>
 
