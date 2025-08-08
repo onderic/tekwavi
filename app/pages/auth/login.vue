@@ -5,6 +5,7 @@ definePageMeta({
 })
 
 const { fetch } = useUserSession()
+const { refreshPropertySelection } = useCurrentProperty()
 const toast = useToast()
 const isLoading = ref(false)
 
@@ -19,8 +20,14 @@ const handleLogin = async (form: { phone: string, password: string }) => {
       body: form,
     })
 
-    // Fetch user session
     await fetch()
+
+    // Refresh property selection with new user data
+    // This will either restore the previous selection (if still valid)
+    // or select the first available property
+    await nextTick(() => {
+      refreshPropertySelection()
+    })
 
     navigateTo('/', { replace: true })
   }
