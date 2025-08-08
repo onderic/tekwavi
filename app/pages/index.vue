@@ -35,8 +35,6 @@
     <DashboardDefault
       v-else-if="user?.role === 'normal'"
     />
-
-    <!-- Pass notifications as props -->
     <ClientOnly>
       <BaseNotificationsSlideover
         v-if="user?.role"
@@ -45,6 +43,7 @@
         @refresh="refreshData"
       />
     </ClientOnly>
+    />
   </BasePage>
 </template>
 
