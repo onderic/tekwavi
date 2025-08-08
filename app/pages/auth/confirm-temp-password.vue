@@ -4,12 +4,19 @@ definePageMeta({
   title: 'Confirm Temporary Password',
 })
 
-const route = useRoute()
 const toast = useToast()
 const isLoading = ref(false)
 
-// Get phone number from query params
-const phone = computed(() => route.query.phone as string || '')
+const phone = ref('')
+
+onMounted(() => {
+  const storedPhone = sessionStorage.getItem('temp-password-phone')
+  if (!storedPhone) {
+    navigateTo('/auth/request-reset-password', { replace: true })
+    return
+  }
+  phone.value = storedPhone
+})
 
 const handleConfirmTempPassword = async (form: { phone: string, tempPassword: string }) => {
   if (isLoading.value) return
@@ -22,13 +29,16 @@ const handleConfirmTempPassword = async (form: { phone: string, tempPassword: st
       body: form,
     })
 
+    sessionStorage.removeItem('temp-password-phone')
+
+    // Store phone for next step
+    sessionStorage.setItem('reset-password-phone', form.phone)
+
     toast.add({
       color: 'success',
       title: 'Temporary Password Verified',
       description: 'Now create your new password.',
     })
-
-    // Navigate to actual reset password page
     navigateTo('/auth/reset-password', { replace: true })
   }
   catch (error) {
@@ -55,11 +65,9 @@ const handleConfirmTempPassword = async (form: { phone: string, tempPassword: st
 </script>
 
 <template>
-  <ClientOnly>
-    <AuthConfirmTempPassword
-      :loading="isLoading"
-      :phone="phone"
-      @confirm-temp-password="handleConfirmTempPassword"
-    />
-  </ClientOnly>
+  <AuthConfirmTempPassword
+    :loading="isLoading"
+    :phone="phone"
+    @confirm-temp-password="handleConfirmTempPassword"
+  />
 </template>
