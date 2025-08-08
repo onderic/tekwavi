@@ -139,15 +139,13 @@
       </div>
     </UCard>
 
-  
-      <ExpensesAdd
-        v-if="showExpenseModal"
-        v-model:open="showExpenseModal"
-        :expense="selectedExpense"
-        :loading="isLoading"
-        @save="handleSubmit"
-      />
-  
+    <ExpensesAdd
+      v-if="showExpenseModal"
+      v-model:open="showExpenseModal"
+      :expense="selectedExpense"
+      :loading="isLoading"
+      @save="handleSubmit"
+    />
   </BasePage>
 </template>
 
