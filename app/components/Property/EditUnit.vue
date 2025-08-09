@@ -2,7 +2,7 @@
   <UModal
     :open="open"
     fullscreen
-    :title="`Update Units on Floor ${floor?.floorNumber}`"
+    :title="`${isCaretaker ? 'View' : 'Update'} Units on Floor ${floor?.floorNumber}`"
     :close="{ onClick: () => emit('update:open', false), color: 'primary', variant: 'outline', class: 'rounded-full' }"
   >
     <template #body>
@@ -16,7 +16,10 @@
           <div class="text-sm text-gray-600 dark:text-gray-400">
             Managing {{ state.units.length }} unit{{ state.units.length > 1 ? 's' : '' }}
           </div>
-          <div class="flex items-center gap-2">
+          <div
+            v-if="!isCaretaker"
+            class="flex items-center gap-2"
+          >
             <UInput
               v-model="unitPrefix"
               placeholder="Unit prefix (e.g. A)"
@@ -32,6 +35,27 @@
               :disabled="isLoading"
               @click="addUnit"
             />
+          </div>
+        </div>
+
+        <!-- Caretaker Alert -->
+        <div
+          v-if="isCaretaker"
+          class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 mb-4"
+        >
+          <div class="flex items-start gap-3">
+            <UIcon
+              name="i-heroicons-information-circle"
+              class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5"
+            />
+            <div>
+              <h4 class="text-sm font-medium text-amber-800 dark:text-amber-200">
+                View Only Access
+              </h4>
+              <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                As a caretaker, you can view unit details but cannot modify rent amounts, add new units, or delete existing units.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -63,7 +87,7 @@
                   Occupied
                 </UBadge>
                 <UButton
-                  v-if="!unit.isOccupied"
+                  v-if="!unit.isOccupied && !isCaretaker"
                   size="xs"
                   color="error"
                   icon="i-lucide-trash-2"
@@ -108,7 +132,7 @@
                   v-model="unit.unitNumber"
                   placeholder="Unit number"
                   size="sm"
-                  :disabled="isLoading || (!!unit.isOccupied && !!unit._id)"
+                  :disabled="isLoading || (!!unit.isOccupied && !!unit._id) || isCaretaker"
                 />
               </UFormField>
 
@@ -121,7 +145,6 @@
                   :items="flatTypeOptions"
                   placeholder="Select type"
                   size="sm"
-                  :disabled="isLoading"
                 />
               </UFormField>
 
@@ -134,7 +157,6 @@
                   :items="furnishingOptions"
                   placeholder="Select furnishing"
                   size="sm"
-                  :disabled="isLoading"
                 />
               </UFormField>
 
@@ -147,7 +169,6 @@
                   :items="categoryOptions"
                   placeholder="Select category"
                   size="sm"
-                  :disabled="isLoading"
                 />
               </UFormField>
 
@@ -165,7 +186,7 @@
                   step="100"
                   placeholder="0.00"
                   size="sm"
-                  :disabled="isLoading"
+                  :disabled="isLoading || isCaretaker"
                 />
               </UFormField>
 
@@ -204,13 +225,13 @@
         <div class="flex justify-between items-center mt-4">
           <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
             <div
-              v-if="newUnitsCount > 0"
+              v-if="newUnitsCount > 0 && !isCaretaker"
               class="text-green-600"
             >
               {{ newUnitsCount }} new unit{{ newUnitsCount > 1 ? 's' : '' }} will be added
             </div>
             <div
-              v-if="deletedCount > 0"
+              v-if="deletedCount > 0 && !isCaretaker"
               class="text-red-500"
             >
               {{ deletedCount }} unit{{ deletedCount > 1 ? 's' : '' }} will be deleted
@@ -220,7 +241,7 @@
             <UButton
               color="neutral"
               variant="soft"
-              label="Cancel"
+              :label="isCaretaker ? 'Close' : 'Cancel'"
               :disabled="isLoading"
               @click="handleCancel"
             />
@@ -230,7 +251,7 @@
               label="Save Changes"
               icon="i-lucide-save"
               :loading="isLoading"
-              :disabled="isLoading || !hasChanges"
+              :disabled="isLoading"
             />
           </div>
         </div>
@@ -263,6 +284,9 @@ const toast = useToast()
 const isLoading = ref(false)
 const originalUnits = ref<string>('')
 const unitPrefix = ref('A')
+const { user } = useUserSession()
+
+const isCaretaker = computed(() => user.value?.role === 'caretaker')
 
 const statusOptions = Object.values(FlatStatus).map(status => ({
   label: status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' '),
@@ -353,8 +377,6 @@ function addUnit() {
 
   let unitNumber = 1
   let newUnitNumber = ''
-
-  // Find next available unit number
   do {
     newUnitNumber = `${unitPrefix.value}${props.floor?.floorNumber}${String(unitNumber).padStart(2, '0')}`
     unitNumber++
