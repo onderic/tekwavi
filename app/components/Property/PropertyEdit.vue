@@ -10,10 +10,13 @@
       <UForm
         :schema="schema"
         :state="form"
-        class="space-y-6 max-w-7xl mx-auto"
+        class="space-y-6 max-w-7xl mx-auto border border-gray-200 dark:border-gray-700 p-6"
         @submit="handleSubmit"
       >
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div
+          class="grid grid-cols-1 gap-6"
+          :class="isCaretaker ? 'lg:grid-cols-1' : 'lg:grid-cols-2'"
+        >
           <div>
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Property Information
@@ -28,7 +31,7 @@
                 <UInput
                   v-model="form.propertyName"
                   placeholder="Enter property name"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
 
@@ -41,14 +44,14 @@
                   v-model="form.categoryName"
                   :items="categoryOptions"
                   placeholder="Select property category"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
             </div>
           </div>
 
-          <!-- Right: Financial Information -->
-          <div>
+          <!-- Right: Financial Information - Hidden for Caretakers -->
+          <div v-if="!isCaretaker">
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Financial Information
             </h3>
@@ -135,6 +138,7 @@
             </div>
           </div>
         </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
@@ -151,7 +155,7 @@
                   <UInput
                     v-model="form.address.street"
                     placeholder="Enter street address"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || isCaretaker"
                   />
                 </UFormField>
               </div>
@@ -164,7 +168,7 @@
                 <UInput
                   v-model="form.address.city"
                   placeholder="Enter city"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
 
@@ -176,7 +180,7 @@
                 <UInput
                   v-model="form.address.state"
                   placeholder="Enter state"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
 
@@ -188,7 +192,7 @@
                 <UInput
                   v-model="form.address.postalCode"
                   placeholder="Enter postal code"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
 
@@ -201,7 +205,7 @@
                   <UInput
                     v-model="form.address.country"
                     placeholder="Enter country"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || isCaretaker"
                   />
                 </UFormField>
               </div>
@@ -215,7 +219,7 @@
                   placeholder="Latitude"
                   type="number"
                   step="0.000001"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
 
@@ -228,11 +232,12 @@
                   placeholder="Longitude"
                   type="number"
                   step="0.000001"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || isCaretaker"
                 />
               </UFormField>
             </div>
           </div>
+
           <div>
             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Property Logo
@@ -281,10 +286,13 @@
                     type="file"
                     accept="image/*"
                     class="hidden"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || isCaretaker"
                     @change="handleLogoUpload"
                   >
-                  <div class="flex gap-3">
+                  <div
+                    v-if="!isCaretaker"
+                    class="flex gap-3"
+                  >
                     <UButton
                       variant="outline"
                       icon="i-lucide-upload"
@@ -304,20 +312,49 @@
                       Remove
                     </UButton>
                   </div>
+                  <div
+                    v-else
+                    class="text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    Logo changes are restricted for caretakers.
+                  </div>
                 </UFormField>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Alert for Caretakers -->
+        <div
+          v-if="isCaretaker"
+          class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800"
+        >
+          <div class="flex items-start gap-3">
+            <UIcon
+              name="i-heroicons-information-circle"
+              class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5"
+            />
+            <div>
+              <h4 class="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Limited Edit Access
+              </h4>
+              <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                As a caretaker, you can only view property details. Contact the property owner for changes to property information, address, or financial details.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div class="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <UButton
             color="neutral"
             variant="ghost"
-            label="Cancel"
+            label="Close"
             :disabled="isSubmitting"
             @click="emit('update:open', false)"
           />
           <UButton
+            v-if="!isCaretaker"
             color="primary"
             label="Save Changes"
             :loading="isSubmitting"
@@ -352,31 +389,47 @@ const props = defineProps({
 
 const isSubmitting = ref(false)
 const toast = useToast()
+const { user } = useUserSession()
 
 const emit = defineEmits(['update:open', 'save'])
 
-const schema = z.object({
-  propertyName: z.string().min(1, 'Property name is required'),
-  categoryName: z.nativeEnum(FlatCategory),
-  address: z.object({
-    street: z.string().min(1, 'Street is required'),
-    city: z.string().min(1, 'City is required'),
-    state: z.string().min(1, 'State is required'),
-    postalCode: z.string().min(1, 'Postal code is required'),
-    country: z.string().min(1, 'Country is required'),
-    latitude: z.number().optional(),
-    longitude: z.number().optional(),
-  }),
-  constructionCost: z.object({
-    totalEstimatedCost: z.number().min(0, 'Estimated cost must be positive').optional(),
-    actualCostIncurred: z.number().min(0, 'Actual cost must be positive').optional(),
-    isExistingProperty: z.boolean().optional(),
-    constructionStartDate: z.string().optional(),
-    constructionEndDate: z.string().optional(),
-    constructionStatus: z.enum(['planning', 'in_progress', 'completed', 'on_hold']).optional(),
-    currency: z.string().optional(),
-    notes: z.string().optional(),
-  }).optional(),
+// Check if user is a caretaker
+const isCaretaker = computed(() => user.value?.role === 'caretaker')
+
+// Dynamic schema based on user role
+const schema = computed(() => {
+  const baseSchema = {
+    propertyName: z.string().min(1, 'Property name is required'),
+    categoryName: z.nativeEnum(FlatCategory),
+    address: z.object({
+      street: z.string().min(1, 'Street is required'),
+      city: z.string().min(1, 'City is required'),
+      state: z.string().min(1, 'State is required'),
+      postalCode: z.string().min(1, 'Postal code is required'),
+      country: z.string().min(1, 'Country is required'),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+    }),
+  }
+
+  // Only add construction cost validation for non-caretakers
+  if (!isCaretaker.value) {
+    return z.object({
+      ...baseSchema,
+      constructionCost: z.object({
+        totalEstimatedCost: z.number().min(0, 'Estimated cost must be positive').optional(),
+        actualCostIncurred: z.number().min(0, 'Actual cost must be positive').optional(),
+        isExistingProperty: z.boolean().optional(),
+        constructionStartDate: z.string().optional(),
+        constructionEndDate: z.string().optional(),
+        constructionStatus: z.enum(['planning', 'in_progress', 'completed', 'on_hold']).optional(),
+        currency: z.string().optional(),
+        notes: z.string().optional(),
+      }).optional(),
+    })
+  }
+
+  return z.object(baseSchema)
 })
 
 const categoryOptions = Object.entries(FlatCategory).map(([_, value]) => ({
@@ -446,6 +499,16 @@ const onImageLoad = () => {
 }
 
 const handleLogoUpload = (event: Event) => {
+  // Prevent caretakers from uploading logos
+  if (isCaretaker.value) {
+    toast.add({
+      title: 'Access Restricted',
+      description: 'Caretakers cannot modify property logos.',
+      color: 'error',
+    })
+    return
+  }
+
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
@@ -482,6 +545,16 @@ const handleLogoUpload = (event: Event) => {
 }
 
 const removeLogo = () => {
+  // Prevent caretakers from removing logos
+  if (isCaretaker.value) {
+    toast.add({
+      title: 'Access Restricted',
+      description: 'Caretakers cannot modify property logos.',
+      color: 'error',
+    })
+    return
+  }
+
   logoPreview.value = ''
   logoFile.value = null
   logoToRemove.value = true
@@ -557,6 +630,16 @@ watch(() => props.property, (newProperty) => {
 
 const handleSubmit = async () => {
   if (!props.property) return
+
+  // Prevent caretakers from submitting changes
+  if (isCaretaker.value) {
+    toast.add({
+      title: 'Access Restricted',
+      description: 'Caretakers cannot modify property details.',
+      color: 'error',
+    })
+    return
+  }
 
   isSubmitting.value = true
 
