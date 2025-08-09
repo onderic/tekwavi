@@ -264,7 +264,7 @@ const handleSubmit = async () => {
           <UButton
             type="button"
             label="Cancel"
-            color="tertiary"
+            color="neutral"
             variant="outline"
             :disabled="props.loading"
             @click="emit('update:open', false)"
