@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
               categoryName: 1,
               logo: 1,
               address: 1,
+              status: 1,
             },
           },
         ],
@@ -41,11 +42,14 @@ export default defineEventHandler(async (event) => {
               categoryName: 1,
               logo: 1,
               address: 1,
+              status: 1,
+              createdBy: 1, // Include property owner info
             },
           },
         ],
       },
     },
+    // ...existing unit lookups...
     {
       $lookup: {
         from: 'units',
@@ -161,8 +165,7 @@ export default defineEventHandler(async (event) => {
     logo: property.logo || null,
     address: `${property.address.street}, ${property.address.city}, ${property.address.state} ${property.address.postalCode}`,
   }))
-
-  // Create user object matching the User type
+  
   const user: User = {
     _id: dbUser._id.toString(),
     first_name: dbUser.first_name || '',
@@ -195,6 +198,5 @@ export default defineEventHandler(async (event) => {
     loggedInAt: new Date(),
   })
 
-  // Return the session like your registration example
   return await getUserSession(event)
 })
