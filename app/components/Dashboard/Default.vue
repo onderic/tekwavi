@@ -121,14 +121,14 @@ function formatDistanceToNow(date: Date) {
   return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`
 }
 
-function getRoleColor(role: string): 'success' | 'error' | 'primary' | 'secondary' | 'tertiary' | 'info' | 'warning' | 'neutral' | undefined {
+function getRoleColor(role: string): 'success' | 'error' | 'primary' | 'secondary' | 'info' | 'warning' | 'neutral' | undefined {
   const colors = {
     developer: 'success',
     caretaker: 'secondary',
     tenant: 'info',
     admin: 'warning',
   }
-  return colors[role as keyof typeof colors] as 'success' | 'error' | 'primary' | 'secondary' | 'tertiary' | 'info' | 'warning' | 'neutral' || 'neutral'
+  return colors[role as keyof typeof colors] as 'success' | 'error' | 'primary' | 'secondary' | 'info' | 'warning' | 'neutral' || 'neutral'
 }
 </script>
 
