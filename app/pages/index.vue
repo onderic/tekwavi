@@ -43,7 +43,6 @@
         @refresh="refreshData"
       />
     </ClientOnly>
-    />
   </BasePage>
 </template>
 
