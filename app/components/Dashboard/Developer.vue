@@ -4,408 +4,171 @@
       <SkeletonAdminDashboard />
     </template>
     <template v-else>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Card 3: Total Rent Collected -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-blue-500/20 text-blue-500">
-              <UIcon
-                name="i-lucide-wallet"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Rent Collected
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ totalRentCollected.toLocaleString() }}
-              </p>
-              <p
-                v-if="rentCollectedChange"
-                class="flex items-center text-xs lg:text-sm"
-                :class="rentCollectedTrend === 'up' ? 'text-green-500' : 'text-red-500'"
-              >
-                <UIcon
-                  :name="rentCollectedTrend === 'up' ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"
-                  class="w-4 h-4 mr-1"
-                />
-                {{ rentCollectedChange }}% frm last month
-              </p>
-            </div>
-          </div>
-        </UCard>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4 mb-6">
+        <!-- Rent Collected -->
+        <BaseMetricCard
+          title="Rent Collected"
+          :value="totalRentCollected"
+          icon="i-lucide-wallet"
+          icon-color="blue"
+          :subtitle="rentCollectedChange ? `${rentCollectedChange}% from last month` : undefined"
+          :trend="rentCollectedTrend"
+          currency
+        />
 
-        <!-- Card 2: Unit Sales Revenue -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-emerald-500/20 text-emerald-500">
-              <UIcon
-                name="i-lucide-home"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Unit Sales Revenue
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ unitSalesRevenue.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ unitsSold }} units sold
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Unit Sales Revenue -->
+        <BaseMetricCard
+          title="Unit Sales Revenue"
+          :value="unitSalesRevenue"
+          icon="i-lucide-home"
+          icon-color="emerald"
+          :subtitle="`${unitsSold} units sold`"
+          currency
+        />
 
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-purple-500/20 text-purple-500">
-              <UIcon
-                name="i-lucide-banknote"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Rent Paid to Owners
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ ownerDisbursements.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                Total disbursed
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Rent Paid to Owners -->
+        <BaseMetricCard
+          title="Rent Paid to Owners"
+          :value="ownerDisbursements"
+          icon="i-lucide-banknote"
+          icon-color="purple"
+          subtitle="Total disbursed"
+          currency
+        />
 
-        <!-- Card 4: Service Charges Collected -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-teal-500/20 text-teal-500">
-              <UIcon
-                name="i-lucide-briefcase"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Service Charges
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ totalServiceCharge.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                From {{ totalUnits }} units
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Service Charges -->
+        <BaseMetricCard
+          title="Service Charges"
+          :value="totalServiceCharge"
+          icon="i-lucide-briefcase"
+          icon-color="teal"
+          :subtitle="`From ${totalUnits} units`"
+          currency
+        />
 
-        <!-- Card 5: Management Commission -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-green-500/20 text-green-500">
-              <UIcon
-                name="i-lucide-calculator"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Commission
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ serviceFeeEarned.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ serviceFeePct }}% of rent collected
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Commission -->
+        <BaseMetricCard
+          title="Commission"
+          :value="serviceFeeEarned"
+          icon="i-lucide-calculator"
+          icon-color="green"
+          :subtitle="`${serviceFeePct}% of rent collected`"
+          currency
+        />
 
-        <!-- Card 6: Operating Expenses -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div
-              class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0"
-              :class="expensesTrend === 'up' ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'"
-            >
-              <UIcon
-                name="i-lucide-receipt"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Operating Expenses
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ totalExpenses.toLocaleString() }}
-              </p>
-              <p
-                v-if="expensesChange"
-                class="flex items-center text-xs lg:text-sm"
-                :class="expensesTrend === 'up' ? 'text-red-500' : 'text-green-500'"
-              >
-                <UIcon
-                  :name="expensesTrend === 'up' ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"
-                  class="w-4 h-4 mr-1"
-                />
-                {{ expensesChange }}% from last month
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Operating Expenses -->
+        <BaseMetricCard
+          title="Operating Expenses"
+          :value="totalExpenses"
+          icon="i-lucide-receipt"
+          :icon-color="expensesTrend === 'up' ? 'red' : 'green'"
+          :subtitle="expensesChange ? `${expensesChange}% from last month` : undefined"
+          :trend="expensesTrend"
+          currency
+        />
 
-        <!-- Card 7: Maintenance Costs -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-orange-500/20 text-orange-500">
-              <UIcon
-                name="i-lucide-wrench"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Maintenance Costs
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ totalMaintenanceCost.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ totalMaintenanceRequests }} requests
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Maintenance Costs -->
+        <BaseMetricCard
+          title="Maintenance Costs"
+          :value="totalMaintenanceCost"
+          icon="i-lucide-wrench"
+          icon-color="orange"
+          :subtitle="`${totalMaintenanceRequests} requests`"
+          currency
+        />
 
-        <!-- Card 8: Net Profit -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div
-              class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0"
-              :class="netRevenue >= 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'"
-            >
-              <UIcon
-                :name="netRevenue >= 0 ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Net Profit
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ netRevenue.toLocaleString() }}
-              </p>
-              <p
-                class="flex items-center text-xs lg:text-sm"
-                :class="netRevenue >= 0 ? 'text-emerald-500' : 'text-red-500'"
-              >
-                <UIcon
-                  :name="netRevenue >= 0 ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"
-                  class="w-4 h-4 mr-1"
-                />
-                {{ Math.abs(parseFloat(netRevenueMargin)) }}% margin
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <!-- Card 1: Construction Cost -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-amber-500/20 text-amber-500">
-              <UIcon
-                name="i-lucide-hammer"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Construction Cost
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ constructionCost.toLocaleString() }}
-              </p>
-              <p
-                v-if="budgetVariance"
-                :class="budgetVarianceStatus === 'over' ? 'text-red-500' : budgetVarianceStatus === 'under' ? 'text-green-500' : 'text-blue-500'"
-                class="text-xs lg:text-sm"
-              >
-                {{ budgetVariance }}% vs budget
-              </p>
-            </div>
-          </div>
-        </UCard>
-        <!-- Card 9: Capital Recovery -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-purple-500/20 text-purple-500">
-              <UIcon
-                name="i-lucide-piggy-bank"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Capital Recovery
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ capitalRecoveryRate }}%
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                KES{{ remainingCapitalToRecover.toLocaleString() }} remaining
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Net Profit -->
+        <BaseMetricCard
+          title="Net Profit"
+          :value="netRevenue"
+          :icon="netRevenue >= 0 ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"
+          :icon-color="netRevenue >= 0 ? 'emerald' : 'red'"
+          :subtitle="`${Math.abs(parseFloat(netRevenueMargin))}% margin`"
+          :trend="netRevenue >= 0 ? 'up' : 'down'"
+          currency
+        />
 
-        <!-- Card 10: Total Units -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-slate-500/20 text-slate-500">
-              <UIcon
-                name="i-lucide-building"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Total Units
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ totalUnits }}
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ unitsSold }} sold
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Construction Cost -->
+        <BaseMetricCard
+          title="Construction Cost"
+          :value="constructionCost"
+          icon="i-lucide-hammer"
+          icon-color="amber"
+          :subtitle="budgetVariance ? `${budgetVariance}% vs budget` : undefined"
+          currency
+        />
 
-        <!-- Card 11: Occupancy Rate -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-indigo-500/20 text-indigo-500">
-              <UIcon
-                name="i-lucide-users"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Occupancy Rate
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ occupancyRate }}%
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ occupiedUnits }} occupied
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Capital Recovery -->
+        <BaseMetricCard
+          title="Capital Recovery"
+          :value="capitalRecoveryRate"
+          icon="i-lucide-piggy-bank"
+          icon-color="purple"
+          :subtitle="`KES${remainingCapitalToRecover.toLocaleString()} remaining`"
+          value-suffix="%"
+        />
 
-        <!-- Card 12: Vacant Units -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-yellow-500/20 text-yellow-500">
-              <UIcon
-                name=""
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Vacant Units
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ vacancyRate }}%
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ vacantUnits }} vacant
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Total Units -->
+        <BaseMetricCard
+          title="Total Units"
+          :value="totalUnits"
+          icon="i-lucide-building"
+          icon-color="slate"
+          :subtitle="`${unitsSold} sold`"
+        />
 
-        <!-- Card 13: Collected Rent Paid to Owners -->
+        <!-- Occupancy Rate -->
+        <BaseMetricCard
+          title="Occupancy Rate"
+          :value="occupancyRate"
+          icon="i-lucide-users"
+          icon-color="indigo"
+          :subtitle="`${occupiedUnits} occupied`"
+          value-suffix="%"
+        />
 
-        <!-- Card 14: Collection Rate -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-lime-500/20 text-lime-500">
-              <UIcon
-                name="i-lucide-check-circle-2"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Collection Rate
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ collectionRate }}%
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                {{ paidInvoices }} of {{ totalInvoices }} paid
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Vacant Units -->
+        <BaseMetricCard
+          title="Vacant Units"
+          :value="vacancyRate"
+          icon="i-lucide-home-x"
+          icon-color="yellow"
+          :subtitle="`${vacantUnits} vacant`"
+          value-suffix="%"
+        />
 
-        <!-- Card 15: Outstanding Payments -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-rose-500/20 text-rose-500">
-              <UIcon
-                name="i-lucide-alert-octagon"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Outstanding
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                KES{{ outstandingPayments.toLocaleString() }}
-              </p>
-              <p class="text-xs lg:text-sm text-rose-500">
-                {{ overdueInvoices }} overdue invoices
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Collection Rate -->
+        <BaseMetricCard
+          title="Collection Rate"
+          :value="collectionRate"
+          icon="i-lucide-check-circle-2"
+          icon-color="lime"
+          :subtitle="`${paidInvoices} of ${totalInvoices} paid`"
+          value-suffix="%"
+        />
 
-        <!-- Card 16: Revenue Efficiency -->
-        <UCard>
-          <div class="flex items-center h-full">
-            <div class="flex justify-center items-center w-14 h-14 lg:w-16 lg:h-16 rounded-xl mr-4 flex-shrink-0 bg-violet-500/20 text-violet-500">
-              <UIcon
-                name="i-lucide-activity"
-                class="w-6 h-6 lg:w-8 lg:h-8"
-              />
-            </div>
-            <div class="flex-grow">
-              <h3 class="text-sm lg:text-base font-medium opacity-80 mb-2">
-                Revenue Efficiency
-              </h3>
-              <p class="text-xl lg:text-2xl font-semibold mb-1.5">
-                {{ revenueEfficiency }}%
-              </p>
-              <p class="text-xs lg:text-sm text-gray-500">
-                of potential revenue
-              </p>
-            </div>
-          </div>
-        </UCard>
+        <!-- Outstanding Payments -->
+        <BaseMetricCard
+          title="Outstanding"
+          :value="outstandingPayments"
+          icon="i-lucide-alert-octagon"
+          icon-color="rose"
+          :subtitle="`${overdueInvoices} overdue invoices`"
+          currency
+        />
+
+        <!-- Revenue Efficiency -->
+        <BaseMetricCard
+          title="Revenue Efficiency"
+          :value="revenueEfficiency"
+          icon="i-lucide-activity"
+          icon-color="violet"
+          subtitle="of potential revenue"
+          value-suffix="%"
+        />
       </div>
 
+      <!-- Charts section remains the same -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <UCard class="h-96 lg:h-[28rem] mb-5">
           <Bar
@@ -443,6 +206,7 @@
           />
         </UCard>
       </div>
+
       <div>
         <UCard class="h-96 lg:h-[28rem] mb-5">
           <Bar
@@ -597,7 +361,6 @@ export default {
       return this.analytics?.totalExpenses || 0
     },
 
-    // Advanced Financial Metrics
     netRevenue() {
       return this.analytics?.netRevenue || 0
     },
@@ -1176,5 +939,4 @@ export default {
 </script>
 
 <style scoped>
-/* Remove all custom CSS - we're using Tailwind classes instead */
 </style>
