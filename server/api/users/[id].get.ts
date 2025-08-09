@@ -1,5 +1,6 @@
 import { isValidObjectId } from 'mongoose'
 import { User } from '~~/server/models/User'
+import type { UserRole } from '~~/shared/enums/roles'
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event)
@@ -11,7 +12,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!user.role || !canPerform(user.role as Role, 'read', 'userManagement:own_profile')) {
+  if (!user.role || !canPerform(user.role as UserRole, 'read', 'userManagement:own_profile')) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Access denied. You do not have permission to fetch user data.',
