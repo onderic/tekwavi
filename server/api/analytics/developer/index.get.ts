@@ -796,7 +796,7 @@ const cachedAnalyticsHandler = defineCachedEventHandler(async (event: H3Event) =
   }
 },
 {
-  maxAge: 7 * 24 * 60 * 60,
+  maxAge: 24 * 60 * 60,
   swr: true,
   name: 'analytics',
   getKey: (event: H3Event) => {
