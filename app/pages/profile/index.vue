@@ -231,7 +231,7 @@
                   Property IDs: {{ user.ownedProperties.join(', ') }}
                 </p>
               </div>
-            </UCard> -->
+            </UCard>
 
             <UCard v-if="user?.role === 'caretaker' && user?.assignedProperty">
               <div>
@@ -269,7 +269,7 @@
                   </p>
                 </div>
               </div>
-            </UCard>
+            </UCard> -->
           </div>
         </UCard>
 
@@ -457,7 +457,6 @@ const updateUser = async () => {
 
 const cancel = () => {
   isUpdateModalOpen.value = false
-  // Reset form state
   Object.assign(state, {
     first_name: user.value?.first_name || '',
     last_name: user.value?.last_name || '',
@@ -469,7 +468,6 @@ const cancel = () => {
   })
 }
 
-// Helper function to format date
 const formatDate = (date: string | Date | undefined) => {
   if (!date) return 'Unknown'
   return new Date(date).toLocaleDateString('en-US', {
