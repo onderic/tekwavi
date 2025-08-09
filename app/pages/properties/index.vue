@@ -117,7 +117,7 @@
         </UCard>
       </div>
 
-      <UCard class="mb-8">
+      <UCard class="mb-8 bg-none">
         <template #header>
           <div class="flex flex-row justify-between items-center gap-2">
             <div class="flex sm:hidden items-center">
@@ -195,7 +195,7 @@
               </div>
               <div>
                 <UButton
-                  v-if="!floor.units || floor.units.length === 0"
+                  v-if="(!floor.units || floor.units.length === 0) && user?.role !== 'caretaker'"
                   color="primary"
                   variant="solid"
                   icon="i-lucide-plus"
