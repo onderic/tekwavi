@@ -96,8 +96,6 @@ const { data: notifications, status, refresh } = useLazyAsyncData(
   'notificationsListings',
   () => {
     const params: Record<string, string> = {}
-
-    // Filter by user's email and phone
     if (user.value?.email) {
       params.email = user.value.email
     }
@@ -212,13 +210,13 @@ function getSenderInfo(notification: Notification) {
     :actions="[]"
   >
     <template #headerActions>
-      <UButton
+      <!-- <UButton
         variant="outline"
         label="Refresh"
         icon="i-lucide-refresh-cw"
         :loading="status === 'pending'"
         @click="refresh()"
-      />
+      /> -->
     </template>
     <div>
       <UCard>
