@@ -52,7 +52,7 @@ const columns: TableColumn<UserType>[] = [
 const { data, status, refresh } = await useLazyAsyncData('UsersList', async () => {
   const [users, pending] = await Promise.all([
     $fetch<UserType[]>('/api/users'),
-    $fetch<Notification[]>('/api/notifications/invite'),
+    $fetch<Notification[]>('/api/notifications'),
   ])
 
   return {
@@ -188,14 +188,12 @@ const handleInvite = async (form: InviteForm) => {
           </div>
         </div>
 
-      
-          <UsersInvite
-            v-if="showInviteModal"
-            v-model:open="showInviteModal"
-            :loading="isLoading"
-            @invite="handleInvite"
-          />
-      
+        <UsersInvite
+          v-if="showInviteModal"
+          v-model:open="showInviteModal"
+          :loading="isLoading"
+          @invite="handleInvite"
+        />
 
         <UTable
           ref="table"
